@@ -2,10 +2,14 @@ import { StlToDepthMap } from './StlToDepthMap';
 
 function App() {
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif' }}>
-      <h1>STL → Depth Map</h1>
+    <>
+    <header className="bg-gray-800 text-white p-4 mb-4">
+      <h1 className="text-2xl font-bold text-center">ThreeDepth</h1>
+    </header>
+    <main className="max-w-5xl mx-auto p-4">
       <StlToDepthMap width={1024} height={1024} />
     </main>
+    </>
   );
 }
 
