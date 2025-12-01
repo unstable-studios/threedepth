@@ -19,11 +19,11 @@ export default function ThemeToggle() {
 
 	// Icon coloring per state
 	const moonClass = clsx(
-		'h-6 w-6 transition-colors group-hover:text-stone-50 text-primary',
+		'h-6 w-6 transition-colors group-hover:text-gray-50 text-primary',
 		theme === 'dark' ? '' : 'opacity-30'
 	);
 	const sunClass = clsx(
-		'h-6 w-6 transition-colors group-hover:text-stone-50 text-primary',
+		'h-6 w-6 transition-colors group-hover:text-gray-50 text-primary',
 		theme === 'light' ? '' : 'opacity-30'
 	);
 

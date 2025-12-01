@@ -3,7 +3,7 @@ function SiteFooter() {
 
 	return (
 		<footer className='border-primary/10 border-t'>
-			<div className='mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-6 font-sans text-sm font-medium tracking-tight text-stone-500 xl:flex-row xl:justify-between'>
+			<div className='mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-6 font-sans text-sm font-medium tracking-tight text-gray-500 xl:flex-row xl:justify-between'>
 				<p>© {year} Unstable Studios. All rights reserved.</p>
 				<div className='flex gap-2 lg:gap-4'>
 					<a href='/privacy' className='hover:text-accent underline'>

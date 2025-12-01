@@ -29,11 +29,11 @@ type ButtonProps = BaseProps &
 	};
 
 const variantClasses: Record<ButtonVariant, string> = {
-	accent: 'bg-accent text-stone-50 shadow-sm',
+	accent: 'bg-accent text-gray-50 shadow-sm',
 	primary: 'bg-primary text-inverse shadow-sm',
 	outline:
-		'border border-stone-300 dark:border-stone-600 bg-transparent text-stone-700 dark:text-stone-200',
-	ghost: 'bg-transparent text-stone-600 dark:text-stone-300',
+		'border border-gray-300 dark:border-gray-600 bg-transparent text-gray-700 dark:text-gray-200',
+	ghost: 'bg-transparent text-gray-600 dark:text-gray-300',
 	destructive: 'bg-red-600 text-white shadow-sm dark:bg-red-500',
 };
 
@@ -53,7 +53,7 @@ const minWidthClasses: Record<ButtonMinWidth, string> = {
 
 // Shared hover/focus styles applied to all variants.
 const sharedInteraction =
-	'hover:bg-gray-800 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
+	'hover:bg-gray-800 hover:text-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
 
 // Base layout classes.
 const baseClasses =

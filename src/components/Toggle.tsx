@@ -18,7 +18,7 @@ export default function Toggle({
 			<div
 				onClick={handleToggle}
 				className={`flex h-8 w-14 cursor-pointer items-center rounded-full p-1 ${
-					isOn ? 'bg-accent' : 'bg-stone-300 dark:bg-stone-600'
+					isOn ? 'bg-accent' : 'bg-gray-300 dark:bg-gray-600'
 				}`}
 			>
 				<div
