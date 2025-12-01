@@ -121,7 +121,13 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 					{icon}
 				</span>
 			)}
-			{contentText && <span className='leading-none'>{contentText}</span>}
+			{contentText &&
+				(typeof contentText === 'string' || typeof contentText === 'number' ? (
+					<span className='leading-none'>{contentText}</span>
+				) : (
+					// When custom node content is passed (e.g., multiple icons), render directly to preserve layout
+					contentText
+				))}
 			{!showSpinner && icon && iconPosition === 'end' && (
 				<span className={clsx(isIconOnly ? '' : 'flex items-center')}>
 					{icon}

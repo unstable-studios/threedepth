@@ -2,7 +2,8 @@ import { Outlet } from 'react-router';
 import { useDarkMode } from './hooks/useDarkMode';
 import SiteFooter from './components/SiteFooter';
 
-function LayoutContent() {
+function Layout() {
+	useDarkMode(); // ensures html.dark toggles so Tailwind dark: works
 	return (
 		<div className='app-root flex h-screen flex-col'>
 			{/* Floating glass toolbar */}
@@ -25,11 +26,6 @@ function LayoutContent() {
 			</div>
 		</div>
 	);
-}
-
-function Layout() {
-	useDarkMode(); // initialize global dark class on mount
-	return <LayoutContent />;
 }
 
 export default Layout;

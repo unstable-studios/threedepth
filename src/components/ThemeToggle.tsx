@@ -5,7 +5,10 @@ import Button from './Button';
 
 type ThemeOption = 'dark' | 'light' | 'system';
 
-export default function ThemeToggle() {
+export default function ThemeToggle(
+	{ className }: { className?: string },
+	...props: any
+) {
 	const { theme, setTheme } = useDarkMode();
 
 	const nextTheme: Record<ThemeOption, ThemeOption> = {
@@ -34,9 +37,10 @@ export default function ThemeToggle() {
 			onClick={handleClick}
 			variant='ghost'
 			size='md'
-			className='group'
+			className={`group ${className}`}
 			aria-label={aria}
 			title={aria}
+			{...props}
 		>
 			<HiOutlineMoon className={moonClass} />
 			<HiOutlineSun className={sunClass} />

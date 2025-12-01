@@ -117,17 +117,17 @@ export default function Editor() {
 			<ToolbarPortal>
 				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
 					<Button
-						size='md'
+						size='lg'
 						variant='ghost'
 						onClick={handleFileImport}
 						icon={<HiUpload />}
 					>
 						Import Model
 					</Button>
-					<Button size='md' variant='ghost' onClick={handleResetCamera}>
+					<Button size='lg' variant='ghost' onClick={handleResetCamera}>
 						Reset Camera
 					</Button>
-					<Button size='md' variant='ghost'>
+					<Button size='lg' variant='ghost'>
 						Export
 					</Button>
 					<ThemeToggle />
