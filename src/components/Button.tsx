@@ -18,13 +18,13 @@ interface BaseProps {
 	size?: ButtonSize;
 	loading?: boolean;
 	loadingText?: string;
-	as?: React.ElementType; // allow rendering as anchor/div/etc.
+	as?: 'button' | 'a' | 'div'; // allow rendering as anchor/div/etc.
 	fullWidth?: boolean; // stretch to container width
 	minWidth?: ButtonMinWidth; // enforce a minimum width token
 }
 
 type ButtonProps = BaseProps &
-	Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'as'> & {
+	Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseProps> & {
 		href?: string; // convenience when using as 'a'
 	};
 
@@ -53,11 +53,11 @@ const minWidthClasses: Record<ButtonMinWidth, string> = {
 
 // Shared hover/focus styles applied to all variants.
 const sharedInteraction =
-	'hover:bg-accent hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
+	'hover:bg-gray-800 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
 
 // Base layout classes.
 const baseClasses =
-	'inline-flex items-center self-start justify-center rounded-md font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed w-auto';
+	'inline-flex items-center self-start justify-center rounded-md font-semibold transition-colors cursor-pointer duration-150 disabled:opacity-50 disabled:cursor-not-allowed w-auto';
 
 export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 	{
@@ -78,30 +78,28 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 	},
 	ref
 ) {
-	const Component = as as React.ElementType;
+	const ElementType = as;
 	const isIconOnly = icon && !children;
 	const showSpinner = loading;
 	const contentText = loading && loadingText ? loadingText : children;
 
-	return (
-		<Component
-			ref={ref}
-			data-variant={variant}
-			href={Component === 'a' ? href : undefined}
-			aria-busy={loading || undefined}
-			disabled={Component === 'button' ? disabled || loading : undefined}
-			className={clsx(
-				baseClasses,
-				variantClasses[variant],
-				sharedInteraction,
-				isIconOnly ? 'p-2' : sizeClasses[size],
-				fullWidth && 'w-full justify-center',
-				minWidth && minWidthClasses[minWidth],
-				loading && 'cursor-wait',
-				className
-			)}
-			{...props}
-		>
+	const commonProps = {
+		'data-variant': variant,
+		'aria-busy': loading || undefined,
+		className: clsx(
+			baseClasses,
+			variantClasses[variant],
+			sharedInteraction,
+			isIconOnly ? 'p-2' : sizeClasses[size],
+			fullWidth && 'w-full justify-center',
+			minWidth && minWidthClasses[minWidth],
+			loading && 'cursor-wait',
+			className
+		),
+	};
+
+	const content = (
+		<>
 			{showSpinner && (
 				<span className={clsx('flex items-center')}>
 					<svg
@@ -129,7 +127,43 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 					{icon}
 				</span>
 			)}
-		</Component>
+		</>
+	);
+
+	if (ElementType === 'a') {
+		return (
+			<a
+				ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+				href={href}
+				{...commonProps}
+				{...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+			>
+				{content}
+			</a>
+		);
+	}
+
+	if (ElementType === 'div') {
+		return (
+			<div
+				ref={ref as React.ForwardedRef<HTMLDivElement>}
+				{...commonProps}
+				{...(props as React.HTMLAttributes<HTMLDivElement>)}
+			>
+				{content}
+			</div>
+		);
+	}
+
+	return (
+		<button
+			ref={ref as React.ForwardedRef<HTMLButtonElement>}
+			disabled={disabled || loading}
+			{...commonProps}
+			{...props}
+		>
+			{content}
+		</button>
 	);
 });
 

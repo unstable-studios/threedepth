@@ -4,7 +4,7 @@ import { StlToDepthMap } from './StlToDepthMap';
 function App() {
 	return (
 		<>
-			<header className='mb-4 bg-gray-800 p-4 text-white'>
+			<header className='mb-4 bg-gray-800 p-4 text-gray-50'>
 				<h1 className='text-center text-2xl font-bold'>ThreeDepth</h1>
 			</header>
 			<main className='mx-auto max-w-5xl p-4'>

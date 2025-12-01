@@ -1,351 +1,322 @@
 import React, { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
-
-type AxisChoice = 'Z' | 'Y' | 'X';
+import { InteractiveViewer } from './components/InteractiveViewer';
+import { Button } from './components/Button';
+import { HiUpload, HiCube } from 'react-icons/hi';
+import type { AxisChoice } from './lib/types';
+import { orientGeometry } from './lib/geometryUtils';
+import { computeVertexColors } from './lib/vertexColors';
+import { renderFastHeightmap } from './lib/fastRenderer';
+import { renderAccurateHeightmap } from './lib/accurateRenderer';
 
 type Props = {
-  width?: number;
-  height?: number;
+	width?: number;
+	height?: number;
 };
 
 export const StlToDepthMap: React.FC<Props> = ({
-  width = 1024,
-  height = 1024,
+	width = 1024,
+	height = 1024,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // keep last loaded file buffer so we can re-render on axis/invert/zoom changes
-  const lastFileRef = useRef<{ name: string; buffer: ArrayBuffer } | null>(null);
+	// keep last loaded file buffer so we can re-render on axis/invert/zoom changes
+	const lastFileRef = useRef<{ name: string; buffer: ArrayBuffer } | null>(
+		null
+	);
 
-  const [status, setStatus] = useState<string>('Drop an STL to begin');
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
-  const [currentFileName, setCurrentFileName] = useState<string | null>(null);
-  const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [axis, setAxis] = useState<AxisChoice>('Z');
-  const [invert, setInvert] = useState<boolean>(false);
-  const [zoom, setZoom] = useState<number>(1); // 1 = zoom-to-fit baseline
+	const [status, setStatus] = useState<string>('Drop an STL to begin');
+	const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+	const [currentFileName, setCurrentFileName] = useState<string | null>(null);
+	const [isRendering, setIsRendering] = useState<boolean>(false);
+	const [axis, setAxis] = useState<AxisChoice>('Z');
+	const [invert, setInvert] = useState<boolean>(false);
+	const [zoom, setZoom] = useState<number>(1); // 1 = zoom-to-fit baseline
+	const [debugColors, setDebugColors] = useState<boolean>(false);
+	const [accurateMode, setAccurateMode] = useState<boolean>(false);
 
-  // Re-render when axis, invert, or zoom changes (after state updates complete)
-  useEffect(() => {
-    const last = lastFileRef.current;
-    if (last && !isRendering) {
-      renderFromBuffer(last.buffer, last.name);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [axis, invert, zoom]);
+	// Re-render when axis, invert, zoom, debugColors, or accurateMode changes
+	useEffect(() => {
+		const last = lastFileRef.current;
+		if (last && !isRendering) {
+			renderFromBuffer(last.buffer, last.name);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [axis, invert, zoom, debugColors, accurateMode]);
 
-  // reorient geometry so that chosen axis becomes "height"
-  const orientGeometry = (geometry: THREE.BufferGeometry, axis: AxisChoice) => {
-    const pos = geometry.getAttribute('position') as THREE.BufferAttribute;
-    const count = pos.count;
+	// core render function – re-used for axis/invert/zoom changes
+	const renderFromBuffer = async (buffer: ArrayBuffer, fileName: string) => {
+		try {
+			setIsRendering(true);
+			setStatus(
+				`Processing ${fileName} (axis ${axis} as height, zoom ${zoom.toFixed(2)}×)…`
+			);
+			setPreviewDataUrl(null);
+			setCurrentFileName(fileName);
 
-    const newPositions = new Float32Array(count * 3);
+			// Load and orient geometry
+			const loader = new STLLoader();
+			const rawGeometry = loader.parse(buffer as ArrayBuffer);
+			const baseGeom = rawGeometry as THREE.BufferGeometry;
+			const geom = orientGeometry(baseGeom, axis);
 
-    for (let i = 0; i < count; i++) {
-      const x = pos.getX(i);
-      const y = pos.getY(i);
-      const z = pos.getZ(i);
+			// Compute bounding box and Z range
+			geom.computeBoundingBox();
+			const bbox = geom.boundingBox!;
+			const zMin = bbox.min.z;
+			const zMax = bbox.max.z;
 
-      let nx: number, ny: number, nz: number;
+			if (zMax - zMin === 0) {
+				setStatus('Model is flat along that axis; heightmap will be uniform.');
+			} else {
+				setStatus('Computing vertex heights…');
+			}
 
-      switch (axis) {
-        case 'Z':
-          nx = x;
-          ny = y;
-          nz = z;
-          break;
-        case 'Y':
-          // Y is height, project onto X–Z
-          nx = x;
-          ny = z;
-          nz = y;
-          break;
-        case 'X':
-          // X is height, project onto Y–Z
-          nx = y;
-          ny = z;
-          nz = x;
-          break;
-        default:
-          nx = x;
-          ny = y;
-          nz = z;
-      }
+			// Compute vertex colors (used by fast mode)
+			const colors = computeVertexColors(geom, zMin, zMax, debugColors, invert);
+			geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-      newPositions[i * 3 + 0] = nx;
-      newPositions[i * 3 + 1] = ny;
-      newPositions[i * 3 + 2] = nz;
-    }
+			// Render heightmap using selected method
+			let dataUrl: string;
+			if (accurateMode) {
+				setStatus('Raycast sampling (accurate mode)…');
+				dataUrl = renderAccurateHeightmap(
+					geom,
+					bbox,
+					zoom,
+					width,
+					height,
+					zMin,
+					zMax,
+					invert
+				);
+			} else {
+				setStatus('Rendering heightmap…');
+				dataUrl = renderFastHeightmap(geom, bbox, zoom, width, height);
+			}
 
-    const newGeom = new THREE.BufferGeometry();
-    newGeom.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
+			setPreviewDataUrl(dataUrl);
+			geom.dispose();
 
-    if (geometry.getIndex()) {
-      newGeom.setIndex(geometry.getIndex()!.clone());
-    }
+			setStatus('Preview ready. Adjust axis/invert/zoom, then download.');
+		} catch (err) {
+			console.error(err);
+			setStatus('Error: ' + (err as Error).message);
+		} finally {
+			setIsRendering(false);
+		}
+	};
 
-    return newGeom;
-  };
+	const handleFile = async (file: File) => {
+		const buffer = await file.arrayBuffer();
+		lastFileRef.current = { name: file.name, buffer };
+		await renderFromBuffer(buffer, file.name);
+	};
 
-  // core render function – re-used for axis/invert/zoom changes
-  const renderFromBuffer = async (buffer: ArrayBuffer, fileName: string) => {
-    try {
-      setIsRendering(true);
-      setStatus(
-        `Processing ${fileName} (axis ${axis} as height, zoom ${zoom.toFixed(2)}×)…`,
-      );
-      setPreviewDataUrl(null);
-      setCurrentFileName(fileName);
+	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			handleFile(file);
+		}
+	};
 
-      const loader = new STLLoader();
-      const rawGeometry = loader.parse(buffer as ArrayBuffer);
+	const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		const file = e.dataTransfer.files?.[0];
+		if (file && file.name.toLowerCase().endsWith('.stl')) {
+			handleFile(file);
+		} else {
+			setStatus('Please drop a single .stl file');
+		}
+	};
 
-      const baseGeom = rawGeometry as THREE.BufferGeometry;
-      const geom = orientGeometry(baseGeom, axis);
+	const triggerDownload = () => {
+		if (!previewDataUrl || !currentFileName) return;
 
-      geom.computeBoundingBox();
-      const bbox = geom.boundingBox!;
-      const zMin = bbox.min.z;
-      const zMax = bbox.max.z;
+		const link = document.createElement('a');
+		link.href = previewDataUrl;
+		link.download = `${currentFileName.replace(/\.[^.]+$/, '')}-heightmap.png`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	};
 
-      if (zMax - zMin === 0) {
-        setStatus('Model is flat along that axis; heightmap will be uniform.');
-      } else {
-        setStatus('Computing vertex heights…');
-      }
+	const handleAxisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setAxis(e.target.value as AxisChoice);
+	};
 
-      const pos = geom.getAttribute('position') as THREE.BufferAttribute;
-      const vertexCount = pos.count;
-      const colors = new Float32Array(vertexCount * 3);
+	const handleInvertChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setInvert(e.target.checked);
+	};
 
-      const span = zMax - zMin || 1;
+	const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newZoom = parseFloat(e.target.value);
+		setZoom(newZoom);
+	};
 
-      for (let i = 0; i < vertexCount; i++) {
-        const vz = pos.getZ(i);
-        let norm = (vz - zMin) / span;
-        norm = THREE.MathUtils.clamp(norm, 0, 1);
-        if (invert) norm = 1 - norm;
+	const handleZoomToFit = () => {
+		setZoom(1);
+	};
 
-        colors[i * 3 + 0] = norm;
-        colors[i * 3 + 1] = norm;
-        colors[i * 3 + 2] = norm;
-      }
+	return (
+		<div className='p-4'>
+			<h1 className='mb-2 text-2xl'>STL → Depth Map</h1>
 
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+			<p className='mb-3 min-h-[1.5em]'>{status}</p>
 
-      const scene = new THREE.Scene();
-      const material = new THREE.MeshBasicMaterial({
-        vertexColors: true,
-        side: THREE.DoubleSide,
-      });
-      const mesh = new THREE.Mesh(geom, material);
-      scene.add(mesh);
+			<div className='mb-4 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-center gap-4'>
+				<label className='flex items-center gap-2'>
+					Height axis:{' '}
+					<select
+						value={axis}
+						onChange={handleAxisChange}
+						disabled={isRendering}
+						className='flex-1'
+					>
+						<option value='Z'>Z (up)</option>
+						<option value='Y'>Y (up)</option>
+						<option value='X'>X (up)</option>
+					</select>
+				</label>
 
-      // center mesh in XY
-      const cx = (bbox.min.x + bbox.max.x) / 2;
-      const cy = (bbox.min.y + bbox.max.y) / 2;
-      mesh.position.set(-cx, -cy, 0);
+				<label className='flex items-center gap-2'>
+					<input
+						type='checkbox'
+						checked={invert}
+						onChange={handleInvertChange}
+						disabled={isRendering}
+					/>{' '}
+					Invert grayscale
+				</label>
 
-      // orthographic camera: compute base size and apply zoom
-      const sizeX = bbox.max.x - bbox.min.x;
-      const sizeY = bbox.max.y - bbox.min.y;
-      const baseSize = Math.max(sizeX, sizeY) || 1;
+				<div className='flex items-center gap-2'>
+					<label className='flex flex-1 items-center gap-1.5'>
+						Zoom:
+						<input
+							type='range'
+							min={0.5}
+							max={4}
+							step={0.1}
+							value={zoom}
+							onChange={handleZoomChange}
+							disabled={isRendering}
+							className='flex-1'
+						/>
+						<span className='min-w-[45px] text-sm'>{zoom.toFixed(2)}×</span>
+					</label>
+				</div>
 
-      // zoom > 1 means closer (smaller view window)
-      const viewSize = baseSize / (zoom || 1);
+				<Button
+					onClick={handleZoomToFit}
+					variant='outline'
+					disabled={isRendering}
+					size='md'
+				>
+					Reset Zoom
+				</Button>
+			</div>
 
-      const camera = new THREE.OrthographicCamera(
-        -viewSize / 2,
-        viewSize / 2,
-        viewSize / 2,
-        -viewSize / 2,
-        0.1,
-        1000,
-      );
-      camera.position.set(0, 0, 10);
-      camera.lookAt(0, 0, 0);
+			<div className='mb-4 text-sm opacity-70'>
+				<div className='mb-4 text-sm opacity-70'>
+					Output resolution: {width}×{height}px
+				</div>
+				<label className='mb-4 flex items-center gap-2 text-sm'>
+					<input
+						type='checkbox'
+						checked={debugColors}
+						onChange={(e) => setDebugColors(e.target.checked)}
+						disabled={isRendering}
+					/>
+					Debug colors
+				</label>
+				<label className='mb-4 flex items-center gap-2 text-sm'>
+					<input
+						type='checkbox'
+						checked={accurateMode}
+						onChange={(e) => setAccurateMode(e.target.checked)}
+						disabled={isRendering}
+					/>
+					Accurate mode (raycast top surface)
+				</label>
+				Output resolution: {width}×{height}px
+			</div>
 
-      const renderer = new THREE.WebGLRenderer({
-        antialias: false,
-        alpha: false,
-        preserveDrawingBuffer: true,
-      });
-      renderer.setSize(width, height);
-      renderer.setClearColor(0x000000, 1);
-
-      setStatus('Rendering heightmap…');
-      renderer.render(scene, camera);
-
-      const canvas = renderer.domElement;
-      const dataUrl = canvas.toDataURL('image/png');
-      setPreviewDataUrl(dataUrl);
-
-      renderer.dispose();
-      geom.dispose();
-      material.dispose();
-
-      setStatus('Preview ready. Adjust axis/invert/zoom, then download.');
-    } catch (err) {
-      console.error(err);
-      setStatus('Error: ' + (err as Error).message);
-    } finally {
-      setIsRendering(false);
-    }
-  };
-
-  const handleFile = async (file: File) => {
-    const buffer = await file.arrayBuffer();
-    lastFileRef.current = { name: file.name, buffer };
-    await renderFromBuffer(buffer, file.name);
-  };
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFile(file);
-    }
-  };
-
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.name.toLowerCase().endsWith('.stl')) {
-      handleFile(file);
-    } else {
-      setStatus('Please drop a single .stl file');
-    }
-  };
-
-  const triggerDownload = () => {
-    if (!previewDataUrl || !currentFileName) return;
-
-    const link = document.createElement('a');
-    link.href = previewDataUrl;
-    link.download = `${currentFileName.replace(/\.[^.]+$/, '')}-heightmap.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleAxisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAxis(e.target.value as AxisChoice);
-  };
-
-  const handleInvertChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInvert(e.target.checked);
-  };
-
-  const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newZoom = parseFloat(e.target.value);
-    setZoom(newZoom);
-  };
-
-  const handleZoomToFit = () => {
-    setZoom(1);
-  };
-
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl mb-2">
-        STL → Depth Map
-      </h1>
-
-      <p className="mb-3 min-h-[1.5em]">{status}</p>
-
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-4 items-center">
-        <label className="flex items-center gap-2">
-          Height axis:{' '}
-          <select
-            value={axis}
-            onChange={handleAxisChange}
-            disabled={isRendering}
-            className="flex-1"
-          >
-            <option value="Z">Z (up)</option>
-            <option value="Y">Y (up)</option>
-            <option value="X">X (up)</option>
-          </select>
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={invert}
-            onChange={handleInvertChange}
-            disabled={isRendering}
-          />{' '}
-          Invert grayscale
-        </label>
-
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 flex-1">
-            Zoom:
-            <input
-              type="range"
-              min={0.5}
-              max={4}
-              step={0.1}
-              value={zoom}
-              onChange={handleZoomChange}
-              disabled={isRendering}
-              className="flex-1"
-            />
-            <span className="text-sm min-w-[45px]">
-              {zoom.toFixed(2)}×
-            </span>
-          </label>
-        </div>
-
-        <button type="button" onClick={handleZoomToFit} disabled={isRendering}>
-          Reset Zoom
-        </button>
-      </div>
-
-      <div className="text-sm opacity-70 mb-4">
-        Output resolution: {width}×{height}px
-      </div>
-
-      <div
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={onDrop}
-        className="border-2 border-dashed border-gray-500 p-8 rounded-lg text-center mb-4 bg-white/2"
-      >
-        <div className="mb-2">Drop STL file here</div>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isRendering}
-        >
-          {isRendering ? 'Working…' : 'Choose STL file…'}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".stl"
-          onChange={onFileChange}
-          className="hidden"
-        />
-      </div>
-
-      {previewDataUrl && (
-        <>
-          <h2 className="text-lg mb-2">
-            Depth Map Preview
-          </h2>
-          <div className="border border-gray-600 p-2 rounded mb-3 bg-black flex justify-center items-center max-w-full overflow-hidden">
-            <img
-              src={previewDataUrl}
-              alt="Depth map preview"
-              className="block max-w-full max-h-[70vh] object-contain"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          </div>
-          <button type="button" onClick={triggerDownload}>
-            Download PNG
-          </button>
-        </>
-      )}
-    </div>
-  );
+			{!previewDataUrl ? (
+				<div
+					onDragOver={(e) => e.preventDefault()}
+					onDrop={onDrop}
+					className='mb-4 rounded-lg border-2 border-dashed border-gray-500 bg-white/2 p-8 text-center transition-colors hover:border-gray-400 hover:bg-white/5'
+				>
+					<HiCube className='mx-auto mb-3 h-12 w-12 text-gray-400' />
+					<div className='mb-3 text-base font-medium'>Drop STL file here</div>
+					<div className='mb-4 text-sm text-gray-500'>or</div>
+					<Button
+						onClick={() => fileInputRef.current?.click()}
+						disabled={isRendering}
+						variant='outline'
+						icon={<HiUpload className='h-3 w-3' />}
+						size='md'
+					>
+						{isRendering ? 'Working…' : 'Choose File'}
+					</Button>
+					<input
+						ref={fileInputRef}
+						type='file'
+						accept='.stl'
+						onChange={onFileChange}
+						className='hidden'
+					/>
+				</div>
+			) : (
+				<>
+					<div className='mb-4 flex items-center justify-between gap-4'>
+						<h2 className='text-lg font-semibold'>Depth Map Preview</h2>
+						<div className='flex items-center gap-3'>
+							<div
+								onDragOver={(e) => e.preventDefault()}
+								onDrop={onDrop}
+								className='flex items-center gap-2'
+							>
+								<Button
+									onClick={() => fileInputRef.current?.click()}
+									disabled={isRendering}
+									variant='outline'
+									size='md'
+									icon={<HiUpload className='h-3 w-3' />}
+								>
+									Change File
+								</Button>
+								<input
+									ref={fileInputRef}
+									type='file'
+									accept='.stl'
+									onChange={onFileChange}
+									className='hidden'
+								/>
+							</div>
+							<Button variant='outline' onClick={triggerDownload} size='md'>
+								Download PNG
+							</Button>
+						</div>
+					</div>
+					{lastFileRef.current && (
+						<InteractiveViewer
+							buffer={lastFileRef.current.buffer}
+							axis={axis}
+							className='mb-3 w-full rounded border border-gray-700'
+						/>
+					)}
+					<div className='mb-3 flex max-w-full items-center justify-center overflow-hidden rounded border border-gray-600 bg-black p-2'>
+						<img
+							src={previewDataUrl}
+							alt='Depth map preview'
+							className='block max-h-[70vh] max-w-full object-contain'
+							style={{ imageRendering: 'pixelated' }}
+						/>
+					</div>
+				</>
+			)}
+		</div>
+	);
 };
