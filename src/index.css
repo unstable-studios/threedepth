@@ -1,9 +1,6 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, sans-serif;
-  line-height: 1.2;
-  font-weight: 500;
 
   color-scheme: light dark;
 
