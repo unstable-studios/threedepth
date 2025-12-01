@@ -17,7 +17,7 @@ function centerAndFitObject(object: THREE.Object3D, camera: THREE.Camera) {
 	// Calculate camera distance to fit object
 	const maxDim = Math.max(size.x, size.y, size.z);
 	const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
-	const cameraDistance = (maxDim / (2 * Math.tan(fov / 2))) * 1.5; // 1.5 for padding
+	const cameraDistance = maxDim / (2 * Math.tan(fov / 2));
 
 	// Position camera at orthogonal angle
 	camera.position.set(cameraDistance, cameraDistance, cameraDistance);

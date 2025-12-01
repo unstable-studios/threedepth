@@ -6,28 +6,62 @@ import { Button } from './components/Button';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './components/ModelLoaders';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import * as THREE from 'three';
 
 function CameraController({
 	setResetFn,
 }: {
 	setResetFn: (fn: () => void) => void;
 }) {
-	const { camera } = useThree();
+	const { camera, scene } = useThree();
 	const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
 	useEffect(() => {
-		// Expose reset function
+		// Expose reset function that fits to current scene content
 		const reset = () => {
-			const distance = 7; // Default distance for orthogonal view
-			camera.position.set(distance, distance, distance);
-			camera.lookAt(0, 0, 0);
+			// Calculate bounding box of all objects in the scene
+			const box = new THREE.Box3();
+			scene.traverse((object) => {
+				if (object instanceof THREE.Mesh || object instanceof THREE.Group) {
+					box.expandByObject(object);
+				}
+			});
+
+			// If box is empty, use default
+			if (box.isEmpty()) {
+				const distance = 7;
+				camera.position.set(distance, distance, distance);
+				camera.lookAt(0, 0, 0);
+			} else {
+				const center = box.getCenter(new THREE.Vector3());
+				const size = box.getSize(new THREE.Vector3());
+
+				// Calculate camera distance to fit object
+				const maxDim = Math.max(size.x, size.y, size.z);
+				const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
+				const cameraDistance = maxDim / (2 * Math.tan(fov / 2));
+
+				// Position camera at orthogonal angle relative to center
+				camera.position.set(
+					center.x + cameraDistance,
+					center.y + cameraDistance,
+					center.z + cameraDistance
+				);
+				camera.lookAt(center);
+
+				// Update controls target to center of object
+				if (controlsRef.current) {
+					controlsRef.current.target.copy(center);
+					controlsRef.current.update();
+				}
+			}
+
 			if (controlsRef.current) {
-				controlsRef.current.target.set(0, 0, 0);
 				controlsRef.current.update();
 			}
 		};
 		setResetFn(reset);
-	}, [camera, setResetFn]);
+	}, [camera, scene, setResetFn]);
 
 	return (
 		<OrbitControls
