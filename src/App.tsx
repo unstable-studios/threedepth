@@ -1,16 +1,22 @@
+import { Routes, Route } from 'react-router';
 import { StlToDepthMap } from './StlToDepthMap';
 
 function App() {
-  return (
-    <>
-    <header className="bg-gray-800 text-white p-4 mb-4">
-      <h1 className="text-2xl font-bold text-center">ThreeDepth</h1>
-    </header>
-    <main className="max-w-5xl mx-auto p-4">
-      <StlToDepthMap width={1024} height={1024} />
-    </main>
-    </>
-  );
+	return (
+		<>
+			<header className='mb-4 bg-gray-800 p-4 text-white'>
+				<h1 className='text-center text-2xl font-bold'>ThreeDepth</h1>
+			</header>
+			<main className='mx-auto max-w-5xl p-4'>
+				<Routes>
+					<Route
+						path='/'
+						element={<StlToDepthMap width={1024} height={1024} />}
+					/>
+				</Routes>
+			</main>
+		</>
+	);
 }
 
 export default App;

@@ -246,32 +246,21 @@ export const StlToDepthMap: React.FC<Props> = ({
   };
 
   return (
-    <div
-      className="stl-depth-tool"
-      style={{ padding: '1rem' }}
-    >
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+    <div className="p-4">
+      <h1 className="text-2xl mb-2">
         STL → Depth Map
       </h1>
 
-      <p style={{ marginBottom: '0.75rem', minHeight: '1.5em' }}>{status}</p>
+      <p className="mb-3 min-h-[1.5em]">{status}</p>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1rem',
-          alignItems: 'center',
-        }}
-      >
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-4 items-center">
+        <label className="flex items-center gap-2">
           Height axis:{' '}
           <select
             value={axis}
             onChange={handleAxisChange}
             disabled={isRendering}
-            style={{ flex: 1 }}
+            className="flex-1"
           >
             <option value="Z">Z (up)</option>
             <option value="Y">Y (up)</option>
@@ -279,7 +268,7 @@ export const StlToDepthMap: React.FC<Props> = ({
           </select>
         </label>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={invert}
@@ -289,8 +278,8 @@ export const StlToDepthMap: React.FC<Props> = ({
           Invert grayscale
         </label>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: 1 }}>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1.5 flex-1">
             Zoom:
             <input
               type="range"
@@ -300,9 +289,9 @@ export const StlToDepthMap: React.FC<Props> = ({
               value={zoom}
               onChange={handleZoomChange}
               disabled={isRendering}
-              style={{ flex: 1 }}
+              className="flex-1"
             />
-            <span style={{ fontSize: '0.85rem', minWidth: 45 }}>
+            <span className="text-sm min-w-[45px]">
               {zoom.toFixed(2)}×
             </span>
           </label>
@@ -313,23 +302,16 @@ export const StlToDepthMap: React.FC<Props> = ({
         </button>
       </div>
 
-      <div style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>
+      <div className="text-sm opacity-70 mb-4">
         Output resolution: {width}×{height}px
       </div>
 
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={onDrop}
-        style={{
-          border: '2px dashed #888',
-          padding: '2rem',
-          borderRadius: 8,
-          textAlign: 'center',
-          marginBottom: '1rem',
-          background: 'rgba(255,255,255,0.02)',
-        }}
+        className="border-2 border-dashed border-gray-500 p-8 rounded-lg text-center mb-4 bg-white/2"
       >
-        <div style={{ marginBottom: '0.5rem' }}>Drop STL file here</div>
+        <div className="mb-2">Drop STL file here</div>
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -342,38 +324,21 @@ export const StlToDepthMap: React.FC<Props> = ({
           type="file"
           accept=".stl"
           onChange={onFileChange}
-          style={{ display: 'none' }}
+          className="hidden"
         />
       </div>
 
       {previewDataUrl && (
         <>
-          <h2 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+          <h2 className="text-lg mb-2">
             Depth Map Preview
           </h2>
-          <div
-            style={{
-              border: '1px solid #444',
-              padding: '0.5rem',
-              borderRadius: 4,
-              marginBottom: '0.75rem',
-              background: '#000',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              maxWidth: '100%',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="border border-gray-600 p-2 rounded mb-3 bg-black flex justify-center items-center max-w-full overflow-hidden">
             <img
               src={previewDataUrl}
               alt="Depth map preview"
-              style={{
-                display: 'block',
-                maxWidth: '100%',
-                objectFit: 'contain',
-                imageRendering: 'pixelated',
-              }}
+              className="block max-w-full max-h-[70vh] object-contain"
+              style={{ imageRendering: 'pixelated' }}
             />
           </div>
           <button type="button" onClick={triggerDownload}>

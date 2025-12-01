@@ -1,0 +1,31 @@
+function SiteFooter() {
+	const year = new Date().getFullYear();
+
+	return (
+		<footer className='border-primary/10 border-t'>
+			<div className='mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-6 font-sans text-sm font-medium tracking-tight text-stone-500 xl:flex-row xl:justify-between'>
+				<p>© {year} Unstable Studios. All rights reserved.</p>
+				<div className='flex gap-2 lg:gap-4'>
+					<a href='/privacy' className='hover:text-accent underline'>
+						Privacy Policy
+					</a>
+					<a href='/terms' className='hover:text-accent underline'>
+						Terms of Service
+					</a>
+				</div>
+				<span className='text-sm'>
+					ThreeDepth is designed and built by{' '}
+					<a
+						href='https://unstablestudios.com'
+						target='_blank'
+						rel='noreferrer'
+						className='hover:text-accent underline underline-offset-2'
+					>
+						Unstable Studios.
+					</a>
+				</span>
+			</div>
+		</footer>
+	);
+}
+export default SiteFooter;

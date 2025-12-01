@@ -1,69 +1,48 @@
-# React + TypeScript + Vite
+# ThreeDepth
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based tool for converting 3D models (STL files) into depth maps and heightmaps.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **STL to Depth Map Conversion**: Upload STL files and generate grayscale heightmaps
+- **Adjustable View Axis**: Choose which axis (X, Y, or Z) to use as the height dimension
+- **Zoom Control**: Fine-tune the framing of your depth map with adjustable zoom
+- **Invert Option**: Flip the grayscale values for different export needs
+- **High-Resolution Output**: Generate 1024×1024px PNG depth maps
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Install dependencies
+npm install
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Start dev server
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+# Build for production
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Deploy to Cloudflare Pages
+npm run deploy
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **React 19** with TypeScript
+- **Three.js** for 3D rendering
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **Vite** for build tooling
+- **Cloudflare Pages** for deployment
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Roadmap
+
+- [ ] 3D interactive preview
+- [ ] Optional bounding box in viewer
+- [ ] Hide/show background (maybe custom color/transparent?)
+- [ ] Spruce up colors and UI overall
+- [ ] Separate header component with simple nav
+
+## License
+
+MIT
