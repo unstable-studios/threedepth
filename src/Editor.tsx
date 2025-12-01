@@ -38,7 +38,7 @@ function CameraController({
 			// If box is empty, use default
 			if (box.isEmpty()) {
 				const distance = 7;
-				camera.position.set(distance, distance, distance);
+				camera.position.set(0, 0, distance);
 				camera.lookAt(0, 0, 0);
 			} else {
 				const center = box.getCenter(new THREE.Vector3());
@@ -47,14 +47,9 @@ function CameraController({
 				// Calculate camera distance to fit object
 				const maxDim = Math.max(size.x, size.y, size.z);
 				const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
-				const cameraDistance = maxDim / (2 * Math.tan(fov / 2));
+				const cameraDistance = maxDim / (2 * Math.tan(fov / 2) * 0.8);
 
-				// Position camera at orthogonal angle relative to center
-				camera.position.set(
-					center.x + cameraDistance,
-					center.y + cameraDistance,
-					center.z + cameraDistance
-				);
+				camera.position.set(0, 0, center.z + cameraDistance);
 				camera.lookAt(center);
 
 				// Update controls target to center of object
@@ -147,7 +142,7 @@ export default function Editor() {
 				className='hidden'
 			/>
 			<div className='absolute inset-0'>
-				<Canvas camera={{ position: [4, 3, 4] }}>
+				<Canvas camera={{ position: [0, 0, 4] }}>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
 
 					{/* Subtle infinite grid: follows camera and hints at scale */}
