@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import { useDarkMode } from './hooks/useDarkMode';
-import SiteFooter from './components/SiteFooter';
+import SiteFooter from './components/ui/SiteFooter';
 
 function Layout() {
 	useDarkMode(); // ensures html.dark toggles so Tailwind dark: works

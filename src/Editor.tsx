@@ -1,12 +1,12 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
-import { Button } from './components/Button';
+import { Button } from './components/ui/Button';
 import { HiUpload } from 'react-icons/hi';
-import { Model } from './components/ModelLoaders';
-import ThemeToggle from './components/ThemeToggle';
+import { Model } from './utils/ModelLoaders';
+import ThemeToggle from './components/ui/ThemeToggle';
 import { useDarkMode } from './hooks/useDarkMode';
-import ToolbarPortal from './components/ToolbarPortal';
+import ToolbarPortal from './utils/ToolbarPortal';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 

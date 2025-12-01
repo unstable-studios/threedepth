@@ -1,6 +1,6 @@
 import { HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
 import clsx from 'clsx';
-import { useDarkMode } from '../hooks/useDarkMode';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import Button from './Button';
 
 type ThemeOption = 'dark' | 'light' | 'system';
