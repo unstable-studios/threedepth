@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" /><meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-		/>
-		<link href="/src/index.css" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var resolvedDark = stored ? stored === 'dark' : prefersDark;
+          if (resolvedDark) document.documentElement.classList.add('dark');
+          var bg = resolvedDark ? '#292524' : '#e7e5e4';
+          document.documentElement.style.backgroundColor = bg;
+          document.body && (document.body.style.backgroundColor = bg);
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
+    <link href="/src/index.css" rel="stylesheet" />
     <title>ThreeDepth</title>
   </head>
   <body>

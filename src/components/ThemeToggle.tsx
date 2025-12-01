@@ -1,6 +1,7 @@
 import { HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
 import clsx from 'clsx';
 import { useDarkMode } from '../hooks/useDarkMode';
+import Button from './Button';
 
 type ThemeOption = 'dark' | 'light' | 'system';
 
@@ -19,27 +20,26 @@ export default function ThemeToggle() {
 
 	// Icon coloring per state
 	const moonClass = clsx(
-		'h-6 w-6 transition-colors group-hover:text-gray-50 text-primary',
+		'h-6 w-6 transition-colors group-hover:text-gray-50 text-gray-400',
 		theme === 'dark' ? '' : 'opacity-30'
 	);
 	const sunClass = clsx(
-		'h-6 w-6 transition-colors group-hover:text-gray-50 text-primary',
+		'h-6 w-6 transition-colors group-hover:text-gray-50 text-gray-400',
 		theme === 'light' ? '' : 'opacity-30'
 	);
 
 	return (
-		<button
+		<Button
 			type='button'
 			onClick={handleClick}
+			variant='ghost'
+			size='md'
+			className='group'
 			aria-label={aria}
 			title={aria}
-			className={clsx(
-				'inline-flex items-center rounded-full p-2',
-				'group hover:bg-accent transition-colors hover:cursor-pointer'
-			)}
 		>
 			<HiOutlineMoon className={moonClass} />
 			<HiOutlineSun className={sunClass} />
-		</button>
+		</Button>
 	);
 }

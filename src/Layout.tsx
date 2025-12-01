@@ -31,7 +31,7 @@ function LayoutContent() {
 }
 
 function Layout() {
-	useDarkMode();
+	useDarkMode(); // initialize global dark class on mount
 	return (
 		<ToolbarProvider>
 			<LayoutContent />

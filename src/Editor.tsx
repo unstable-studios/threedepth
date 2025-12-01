@@ -5,6 +5,8 @@ import { useToolbar } from './contexts/ToolbarContext';
 import { Button } from './components/Button';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './components/ModelLoaders';
+import ThemeToggle from './components/ThemeToggle';
+import { useDarkMode } from './hooks/useDarkMode';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 
@@ -81,6 +83,7 @@ export default function Editor() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const { setToolbarContent } = useToolbar();
+	const { isDark } = useDarkMode();
 
 	const handleFileImport = () => {
 		fileInputRef.current?.click();
@@ -125,6 +128,7 @@ export default function Editor() {
 				<Button size='md' variant='ghost'>
 					Export
 				</Button>
+				<ThemeToggle />
 			</>
 		);
 
@@ -143,7 +147,7 @@ export default function Editor() {
 			/>
 			<div className='absolute inset-0'>
 				<Canvas camera={{ position: [4, 3, 4] }}>
-					<color attach='background' args={['#1a1a1a']} />
+					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
 
 					<Suspense fallback={null}>
 						{modelUrl && modelFormat ? (
