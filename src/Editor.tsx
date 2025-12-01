@@ -70,6 +70,7 @@ function CameraController({
 		<OrbitControls
 			ref={controlsRef}
 			enableDamping
+			enablePan={false}
 			dampingFactor={0.05}
 			rotateSpeed={0.5}
 		/>
