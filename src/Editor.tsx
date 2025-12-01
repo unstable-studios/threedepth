@@ -1,9 +1,15 @@
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, GizmoHelper, GizmoViewport } from '@react-three/drei';
+import {
+	OrbitControls,
+	GizmoHelper,
+	GizmoViewport,
+	Grid,
+} from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Button } from './components/ui/Button';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './utils/ModelLoaders';
+import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import ThemeToggle from './components/ui/ThemeToggle';
 import { useDarkMode } from './hooks/useDarkMode';
 import ToolbarPortal from './utils/ToolbarPortal';
@@ -144,18 +150,27 @@ export default function Editor() {
 				<Canvas camera={{ position: [4, 3, 4] }}>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
 
+					{/* Subtle infinite grid: follows camera and hints at scale */}
+					<Grid
+						infiniteGrid
+						fadeDistance={50}
+						fadeStrength={0.5}
+						cellSize={0.5}
+						cellThickness={0.7}
+						sectionSize={5}
+						sectionThickness={1}
+						cellColor={isDark ? '#2f2f30' : '#e5e7eb'}
+						sectionColor={isDark ? '#4b4b4d' : '#cbd5e1'}
+						position={[0, 0, -0.01]} // slight offset to avoid z-fighting
+						rotation={[Math.PI / 2, 0, 0]}
+						side={THREE.DoubleSide}
+					/>
+
 					<Suspense fallback={null}>
 						{modelUrl && modelFormat ? (
 							<Model url={modelUrl} format={modelFormat} />
 						) : (
-							<mesh>
-								<boxGeometry args={[4, 2, 2]} />
-								<meshStandardMaterial
-									color='#ffffff'
-									roughness={0.3}
-									metalness={0.1}
-								/>
-							</mesh>
+							<Model url={defaultStlUrl} format={'stl'} />
 						)}
 					</Suspense>
 
