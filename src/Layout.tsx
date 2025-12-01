@@ -1,11 +1,8 @@
 import { Outlet } from 'react-router';
 import { useDarkMode } from './hooks/useDarkMode';
 import SiteFooter from './components/SiteFooter';
-import { ToolbarProvider, useToolbar } from './contexts/ToolbarContext';
 
 function LayoutContent() {
-	const { toolbarContent } = useToolbar();
-
 	return (
 		<div className='app-root flex h-screen flex-col'>
 			{/* Floating glass toolbar */}
@@ -15,11 +12,11 @@ function LayoutContent() {
 						ThreeDepth
 					</h1>
 				</div>
-				{toolbarContent && (
-					<div className='pointer-events-auto flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
-						{toolbarContent}
-					</div>
-				)}
+				{/* Toolbar slot: children will be portaled here */}
+				<div
+					id='app-toolbar-slot'
+					className='pointer-events-auto flex items-center'
+				></div>
 			</header>
 
 			<div id='main-content' className='flex flex-1 flex-col'>
@@ -32,11 +29,7 @@ function LayoutContent() {
 
 function Layout() {
 	useDarkMode(); // initialize global dark class on mount
-	return (
-		<ToolbarProvider>
-			<LayoutContent />
-		</ToolbarProvider>
-	);
+	return <LayoutContent />;
 }
 
 export default Layout;

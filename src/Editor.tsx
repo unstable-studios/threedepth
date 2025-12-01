@@ -1,12 +1,12 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
-import { useToolbar } from './contexts/ToolbarContext';
 import { Button } from './components/Button';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './components/ModelLoaders';
 import ThemeToggle from './components/ThemeToggle';
 import { useDarkMode } from './hooks/useDarkMode';
+import ToolbarPortal from './components/ToolbarPortal';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 
@@ -82,7 +82,6 @@ export default function Editor() {
 	>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
-	const { setToolbarContent } = useToolbar();
 	const { isDark } = useDarkMode();
 
 	const handleFileImport = () => {
@@ -110,34 +109,30 @@ export default function Editor() {
 		setModelFormat(extension as 'gltf' | 'glb' | 'stl' | 'obj');
 	};
 
-	// Add controls to the floating toolbar
-	useEffect(() => {
-		setToolbarContent(
-			<>
-				<Button
-					size='md'
-					variant='ghost'
-					onClick={handleFileImport}
-					icon={<HiUpload />}
-				>
-					Import Model
-				</Button>
-				<Button size='md' variant='ghost' onClick={handleResetCamera}>
-					Reset Camera
-				</Button>
-				<Button size='md' variant='ghost'>
-					Export
-				</Button>
-				<ThemeToggle />
-			</>
-		);
-
-		// Cleanup when component unmounts
-		return () => setToolbarContent(null);
-	}, [setToolbarContent, handleResetCamera]);
+	// no-op: toolbar content now rendered via portal below
 
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
+			{/* Toolbar content rendered into header via portal */}
+			<ToolbarPortal>
+				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
+					<Button
+						size='md'
+						variant='ghost'
+						onClick={handleFileImport}
+						icon={<HiUpload />}
+					>
+						Import Model
+					</Button>
+					<Button size='md' variant='ghost' onClick={handleResetCamera}>
+						Reset Camera
+					</Button>
+					<Button size='md' variant='ghost'>
+						Export
+					</Button>
+					<ThemeToggle />
+				</div>
+			</ToolbarPortal>
 			<input
 				ref={fileInputRef}
 				type='file'
