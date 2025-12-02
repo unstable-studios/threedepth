@@ -21,11 +21,29 @@ import * as THREE from 'three';
 
 function CameraController({
 	setResetFn,
+	setExportFn,
 }: {
 	setResetFn: (fn: () => void) => void;
+	setExportFn: (fn: () => void) => void;
 }) {
-	const { scene } = useThree();
+	const { scene, camera, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
+	const exportCameraRef = useRef<THREE.OrthographicCamera | null>(null);
+
+	useEffect(() => {
+		// Create orthographic camera for export (top-down view)
+		const orthoCamera = new THREE.OrthographicCamera(
+			-10,
+			10,
+			10,
+			-10,
+			0.1,
+			100
+		);
+		orthoCamera.position.set(0, 0, 30);
+		orthoCamera.lookAt(0, 0, 0);
+		exportCameraRef.current = orthoCamera;
+	}, []);
 
 	useEffect(() => {
 		const reset = async () => {
@@ -56,7 +74,119 @@ function CameraController({
 			}
 		};
 		setResetFn(reset);
-	}, [scene, setResetFn]);
+
+		const exportImage = () => {
+			if (!exportCameraRef.current) return;
+
+			// Calculate model bounds (only meshes, not grid)
+			const box = new THREE.Box3();
+			scene.traverse((object) => {
+				if (object instanceof THREE.Mesh && !object.userData.isGrid) {
+					box.expandByObject(object);
+				}
+			});
+
+			if (box.isEmpty()) return;
+
+			const size = box.getSize(new THREE.Vector3());
+			const center = box.getCenter(new THREE.Vector3());
+
+			// Create square render target matching model's largest dimension
+			const maxDim = Math.max(size.x, size.y);
+			const renderSize = 1024; // Fixed square output size
+
+			// Update orthographic camera to fit model exactly (square)
+			exportCameraRef.current.left = -maxDim / 2;
+			exportCameraRef.current.right = maxDim / 2;
+			exportCameraRef.current.top = maxDim / 2;
+			exportCameraRef.current.bottom = -maxDim / 2;
+
+			exportCameraRef.current.position.set(center.x, center.y, box.max.z + 10);
+			exportCameraRef.current.lookAt(center.x, center.y, center.z);
+			exportCameraRef.current.updateProjectionMatrix();
+
+			// Create offscreen render target
+			const renderTarget = new THREE.WebGLRenderTarget(renderSize, renderSize);
+
+			// Temporarily hide grid and gizmo
+			const hiddenObjects: THREE.Object3D[] = [];
+			// Store original background and set to transparent
+			const originalBackground = scene.background;
+			scene.background = null;
+
+			scene.traverse((object) => {
+				if (
+					object.type === 'GridHelper' ||
+					object.userData.isGrid ||
+					object.name === 'GizmoHelper' ||
+					object.parent?.name === 'GizmoHelper'
+				) {
+					if (object.visible) {
+						hiddenObjects.push(object);
+						object.visible = false;
+					}
+				}
+			});
+
+			// Render to offscreen target
+			gl.setRenderTarget(renderTarget);
+			gl.render(scene, exportCameraRef.current);
+			gl.setRenderTarget(null);
+			// Restore background
+			scene.background = originalBackground;
+
+			// Restore visibility
+			hiddenObjects.forEach((obj) => (obj.visible = true));
+
+			// Read pixels from render target
+			const pixels = new Uint8Array(renderSize * renderSize * 4);
+			gl.readRenderTargetPixels(
+				renderTarget,
+				0,
+				0,
+				renderSize,
+				renderSize,
+				pixels
+			);
+
+			// Create canvas and draw pixels
+			const canvas = document.createElement('canvas');
+			canvas.width = renderSize;
+			canvas.height = renderSize;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return;
+
+			const imageData = ctx.createImageData(renderSize, renderSize);
+			// Flip Y axis (WebGL renders upside down)
+			for (let y = 0; y < renderSize; y++) {
+				for (let x = 0; x < renderSize; x++) {
+					const flippedY = renderSize - 1 - y;
+					const srcIdx = (flippedY * renderSize + x) * 4;
+					const dstIdx = (y * renderSize + x) * 4;
+					imageData.data[dstIdx] = pixels[srcIdx];
+					imageData.data[dstIdx + 1] = pixels[srcIdx + 1];
+					imageData.data[dstIdx + 2] = pixels[srcIdx + 2];
+					imageData.data[dstIdx + 3] = pixels[srcIdx + 3];
+				}
+			}
+			ctx.putImageData(imageData, 0, 0);
+
+			// Download
+			canvas.toBlob((blob) => {
+				if (!blob) return;
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.download = `depth-map-${Date.now()}.png`;
+				link.href = url;
+				link.click();
+				URL.revokeObjectURL(url);
+			});
+
+			// Cleanup
+			renderTarget.dispose();
+		};
+		setExportFn(exportImage);
+	}, [scene, setResetFn, setExportFn, camera, gl]);
 
 	return (
 		<CameraControls
@@ -96,6 +226,7 @@ export default function Editor() {
 	const showDepth = true;
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
+	const exportRef = useRef<(() => void) | null>(null);
 	const { isDark } = useDarkMode();
 
 	const upAxisOptions = [
@@ -119,6 +250,10 @@ export default function Editor() {
 		setUpAxis(newAxis);
 		// Reset camera after a short delay to allow model to update
 		setTimeout(() => resetCameraRef.current?.(), 100);
+	}, []);
+
+	const handleExport = useCallback(() => {
+		exportRef.current?.();
 	}, []);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,8 +308,8 @@ export default function Editor() {
 					>
 						{showDepth ? 'Show Model' : 'Show Depth'}
 					</Button> */}
-					<Button size='lg' variant='ghost'>
-						Export
+					<Button size='lg' variant='accent' onClick={handleExport}>
+						Export PNG
 					</Button>
 				</div>
 			</ToolbarPortal>
@@ -202,6 +337,7 @@ export default function Editor() {
 						sectionColor={isDark ? '#4b4b4d' : '#cbd5e1'}
 						position={[0, 0, -0.01]} // slight offset to avoid z-fighting
 						rotation={[Math.PI / 2, 0, 0]}
+						userData={{ isGrid: true }}
 					/>
 
 					<Suspense fallback={null}>
@@ -233,6 +369,7 @@ export default function Editor() {
 
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
+						setExportFn={(fn) => (exportRef.current = fn)}
 					/>
 
 					<GizmoHelper alignment='bottom-right' margin={[80, 80]}>
