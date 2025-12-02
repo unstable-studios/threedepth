@@ -9,6 +9,7 @@ import {
 const { ACTION } = CameraControlsImpl;
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Button } from './components/ui/Button';
+import { Select } from './components/ui/Select';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './utils/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
@@ -82,9 +83,19 @@ export default function Editor() {
 	const [modelFormat, setModelFormat] = useState<
 		'gltf' | 'glb' | 'stl' | 'obj' | null
 	>(null);
+	const [upAxis, setUpAxis] = useState<string>('Z+');
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const { isDark } = useDarkMode();
+
+	const upAxisOptions = [
+		{ value: 'Z+', label: 'Up: Z+' },
+		{ value: 'Z-', label: 'Up: Z-' },
+		{ value: 'Y+', label: 'Up: Y+' },
+		{ value: 'Y-', label: 'Up: Y-' },
+		{ value: 'X+', label: 'Up: X+' },
+		{ value: 'X-', label: 'Up: X-' },
+	];
 
 	const handleFileImport = () => {
 		fileInputRef.current?.click();
@@ -92,6 +103,12 @@ export default function Editor() {
 
 	const handleResetCamera = useCallback(() => {
 		resetCameraRef.current?.();
+	}, []);
+
+	const handleUpAxisChange = useCallback((newAxis: string) => {
+		setUpAxis(newAxis);
+		// Reset camera after a short delay to allow model to update
+		setTimeout(() => resetCameraRef.current?.(), 100);
 	}, []);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +140,12 @@ export default function Editor() {
 					>
 						Import Model
 					</Button>
+					<Select
+						options={upAxisOptions}
+						value={upAxis}
+						onChange={handleUpAxisChange}
+						size='lg'
+					/>
 					<Button size='lg' variant='ghost' onClick={handleResetCamera}>
 						Reset Camera
 					</Button>
@@ -164,12 +187,14 @@ export default function Editor() {
 							<Model
 								url={modelUrl}
 								format={modelFormat}
+								upAxis={upAxis}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						) : (
 							<Model
 								url={defaultStlUrl}
 								format={'stl'}
+								upAxis={upAxis}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						)}
