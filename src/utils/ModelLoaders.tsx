@@ -1,101 +1,115 @@
-import { useLoader, useThree } from '@react-three/fiber';
+import { useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
+import { normalizeObject, normalizeObjectInPlace } from './geometry';
 
-function centerAndFitObject(
-	object: THREE.Object3D,
-	camera: THREE.Camera,
-	targetSize = 20
-) {
-	// Compute initial bounding box
-	const initialBox = new THREE.Box3().setFromObject(object);
-	const initialSize = initialBox.getSize(new THREE.Vector3());
-	const initialMaxDim = Math.max(initialSize.x, initialSize.y, initialSize.z);
-
-	// Normalize scale to fit target cube (uniform scale)
-	if (initialMaxDim > 0 && isFinite(initialMaxDim)) {
-		const scaleFactor = targetSize / initialMaxDim;
-		object.scale.multiplyScalar(scaleFactor);
-	}
-
-	// Recompute bounding box after scaling
-	const box = new THREE.Box3().setFromObject(object);
-	const center = box.getCenter(new THREE.Vector3());
-	const size = box.getSize(new THREE.Vector3());
-	const min = box.min.clone();
-
-	// Center X and Y to origin, place Z-min at z=0
-	const translation = new THREE.Vector3(center.x, center.y, min.z);
-	object.position.sub(translation);
-
-	// Calculate camera distance to fit object
-	const maxDim = Math.max(size.x, size.y, size.z);
-	const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
-	const cameraDistance = maxDim / (2 * Math.tan(fov / 2));
-
-	// Position camera at orthogonal angle relative to origin
-	camera.position.set(cameraDistance, cameraDistance, cameraDistance);
-	camera.lookAt(0, 0, 0);
-}
-
-export function STLModel({ url }: { url: string }) {
+export function STLModel({
+	url,
+	normalizeMode = 'clone',
+	onReady,
+}: {
+	url: string;
+	normalizeMode?: 'clone' | 'mutate';
+	onReady?: () => void;
+}) {
 	const geometry = useLoader(STLLoader, url);
-	const { camera } = useThree();
-	const meshRef = useRef<THREE.Mesh>(null);
-
-	useEffect(() => {
-		if (meshRef.current) {
-			centerAndFitObject(meshRef.current, camera);
-		}
-	}, [geometry, camera]);
-
-	return (
-		<mesh ref={meshRef} geometry={geometry}>
-			<meshStandardMaterial color='#ffffff' roughness={0.3} metalness={0.1} />
-		</mesh>
+	const mesh = useMemo(
+		() =>
+			new THREE.Mesh(
+				geometry,
+				new THREE.MeshStandardMaterial({
+					color: '#ffffff',
+					roughness: 0.3,
+					metalness: 0.1,
+				})
+			),
+		[geometry]
 	);
+	const output = useMemo(
+		() =>
+			normalizeMode === 'mutate'
+				? normalizeObjectInPlace(mesh)
+				: normalizeObject(mesh),
+		[mesh, normalizeMode]
+	);
+
+	useEffect(() => {
+		if (onReady) onReady();
+	}, [output, onReady]);
+	return <primitive object={output} />;
 }
 
-export function GLTFModel({ url }: { url: string }) {
+export function GLTFModel({
+	url,
+	normalizeMode = 'clone',
+	onReady,
+}: {
+	url: string;
+	normalizeMode?: 'clone' | 'mutate';
+	onReady?: () => void;
+}) {
 	const gltf = useLoader(GLTFLoader, url);
-	const { camera } = useThree();
-	const groupRef = useRef<THREE.Group>(null);
-
+	const normalized = useMemo(
+		() =>
+			normalizeMode === 'mutate'
+				? normalizeObjectInPlace(gltf.scene)
+				: normalizeObject(gltf.scene),
+		[gltf.scene, normalizeMode]
+	);
 	useEffect(() => {
-		if (groupRef.current) {
-			centerAndFitObject(groupRef.current, camera);
-		}
-	}, [gltf.scene, camera]);
-
-	return <primitive ref={groupRef} object={gltf.scene} />;
+		if (onReady) onReady();
+	}, [normalized, onReady]);
+	return <primitive object={normalized} />;
 }
 
-export function OBJModel({ url }: { url: string }) {
+export function OBJModel({
+	url,
+	normalizeMode = 'clone',
+	onReady,
+}: {
+	url: string;
+	normalizeMode?: 'clone' | 'mutate';
+	onReady?: () => void;
+}) {
 	const model = useLoader(OBJLoader, url);
-	const { camera } = useThree();
-	const groupRef = useRef<THREE.Group>(null);
-
+	const normalized = useMemo(
+		() =>
+			normalizeMode === 'mutate'
+				? normalizeObjectInPlace(model)
+				: normalizeObject(model),
+		[model, normalizeMode]
+	);
 	useEffect(() => {
-		if (groupRef.current) {
-			centerAndFitObject(groupRef.current, camera);
-		}
-	}, [model, camera]);
-
-	return <primitive ref={groupRef} object={model} />;
+		if (onReady) onReady();
+	}, [normalized, onReady]);
+	return <primitive object={normalized} />;
 }
 
 export function Model({
 	url,
 	format,
+	normalizeMode = 'clone',
+	onReady,
 }: {
 	url: string;
 	format: 'gltf' | 'glb' | 'stl' | 'obj';
+	normalizeMode?: 'clone' | 'mutate';
+	onReady?: () => void;
 }) {
-	if (format === 'stl') return <STLModel url={url} />;
-	if (format === 'gltf' || format === 'glb') return <GLTFModel url={url} />;
-	if (format === 'obj') return <OBJModel url={url} />;
+	if (format === 'stl')
+		return (
+			<STLModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
+		);
+	if (format === 'gltf' || format === 'glb')
+		return (
+			<GLTFModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
+		);
+	if (format === 'obj')
+		return (
+			<OBJModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
+		);
 	return null;
 }

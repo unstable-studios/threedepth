@@ -15,6 +15,7 @@ import { useDarkMode } from './hooks/useDarkMode';
 import ToolbarPortal from './utils/ToolbarPortal';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
+import { computeSceneBoundingBox, computeCameraReset } from './utils/camera';
 
 function CameraController({
 	setResetFn,
@@ -25,41 +26,16 @@ function CameraController({
 	const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
 	useEffect(() => {
-		// Expose reset function that fits to current scene content
 		const reset = () => {
-			// Calculate bounding box of all objects in the scene
-			const box = new THREE.Box3();
-			scene.traverse((object) => {
-				if (object instanceof THREE.Mesh || object instanceof THREE.Group) {
-					box.expandByObject(object);
-				}
-			});
-
-			// If box is empty, use default
-			if (box.isEmpty()) {
-				const distance = 7;
-				camera.position.set(0, 0, distance);
-				camera.lookAt(0, 0, 0);
-			} else {
-				const center = box.getCenter(new THREE.Vector3());
-				const size = box.getSize(new THREE.Vector3());
-
-				// Calculate camera distance to fit object
-				const maxDim = Math.max(size.x, size.y, size.z);
-				const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
-				const cameraDistance = maxDim / (2 * Math.tan(fov / 2) * 0.8);
-
-				camera.position.set(0, 0, center.z + cameraDistance);
-				camera.lookAt(center);
-
-				// Update controls target to center of object
-				if (controlsRef.current) {
-					controlsRef.current.target.copy(center);
-					controlsRef.current.update();
-				}
-			}
-
+			const box = computeSceneBoundingBox(scene as unknown as THREE.Scene);
+			const { position, target } = computeCameraReset(
+				box,
+				camera as THREE.PerspectiveCamera
+			);
+			camera.position.copy(position);
+			(camera as THREE.PerspectiveCamera).lookAt(target);
 			if (controlsRef.current) {
+				controlsRef.current.target.copy(target);
 				controlsRef.current.update();
 			}
 		};
@@ -143,7 +119,7 @@ export default function Editor() {
 				className='hidden'
 			/>
 			<div className='absolute inset-0'>
-				<Canvas camera={{ position: [0, 0, 4] }}>
+				<Canvas>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
 
 					{/* Subtle infinite grid: follows camera and hints at scale */}
@@ -164,9 +140,17 @@ export default function Editor() {
 
 					<Suspense fallback={null}>
 						{modelUrl && modelFormat ? (
-							<Model url={modelUrl} format={modelFormat} />
+							<Model
+								url={modelUrl}
+								format={modelFormat}
+								onReady={() => resetCameraRef.current?.()}
+							/>
 						) : (
-							<Model url={defaultStlUrl} format={'stl'} />
+							<Model
+								url={defaultStlUrl}
+								format={'stl'}
+								onReady={() => resetCameraRef.current?.()}
+							/>
 						)}
 					</Suspense>
 
@@ -175,7 +159,6 @@ export default function Editor() {
 					<directionalLight position={[-3, -3, 3]} intensity={0.6} />
 					<pointLight position={[0, 5, 0]} intensity={0.5} />
 
-					{/* drag to orbit, scroll to zoom, right-click to pan */}
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
 					/>
