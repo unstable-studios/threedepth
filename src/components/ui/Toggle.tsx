@@ -9,7 +9,7 @@ export default function Toggle({
 	label?: string;
 	labelRight?: boolean;
 }) {
-	const labelClass = 'text-primary font-semibold text-xl';
+	const labelClass = 'text-gray-700 font-semibold text-xl';
 	return (
 		<div className='flex items-center'>
 			{label && !labelRight && (
@@ -18,7 +18,7 @@ export default function Toggle({
 			<div
 				onClick={handleToggle}
 				className={`flex h-8 w-14 cursor-pointer items-center rounded-full p-1 ${
-					isOn ? 'bg-accent' : 'bg-gray-300 dark:bg-gray-600'
+					isOn ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
 				}`}
 			>
 				<div

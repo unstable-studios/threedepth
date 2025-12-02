@@ -5,10 +5,10 @@ function SiteFooter() {
 		<footer className='flex w-full flex-col items-center gap-2 px-4 py-6 font-sans text-sm font-medium tracking-tight text-gray-500 xl:flex-row xl:justify-between xl:px-8'>
 			<p>© {year} Unstable Studios. All rights reserved.</p>
 			<div className='flex gap-2 lg:gap-4'>
-				<a href='/privacy' className='hover:text-accent underline'>
+				<a href='/privacy' className='underline hover:text-blue-500'>
 					Privacy Policy
 				</a>
-				<a href='/terms' className='hover:text-accent underline'>
+				<a href='/terms' className='underline hover:text-blue-500'>
 					Terms of Service
 				</a>
 			</div>
@@ -18,7 +18,7 @@ function SiteFooter() {
 					href='https://unstablestudios.com'
 					target='_blank'
 					rel='noreferrer'
-					className='hover:text-accent underline underline-offset-2'
+					className='underline underline-offset-2 hover:text-blue-500'
 				>
 					Unstable Studios.
 				</a>

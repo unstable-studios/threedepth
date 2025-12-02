@@ -16,9 +16,9 @@ interface SelectProps {
 }
 
 const sizeClasses = {
-	sm: 'text-xs px-2.5 py-1.5',
-	md: 'text-sm px-4 py-2',
-	lg: 'text-base px-5 py-3',
+	sm: 'text-xs px-2.5 py-1.5 gap-1',
+	md: 'text-sm px-4 py-2 gap-2',
+	lg: 'text-base px-5 py-3 gap-2.5',
 };
 
 export function Select({
@@ -56,15 +56,15 @@ export function Select({
 				type='button'
 				onClick={() => setIsOpen(!isOpen)}
 				className={clsx(
-					'inline-flex items-center justify-between gap-2 rounded-md font-semibold transition-colors',
+					'inline-flex items-center justify-center gap-2 self-start rounded-md font-semibold transition-colors',
 					'bg-transparent text-gray-600 dark:text-gray-300',
 					'hover:bg-gray-800 hover:text-gray-50',
-					'focus-visible:ring-accent focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-					'min-w-[140px]',
 					sizeClasses[size]
 				)}
 			>
-				<span>{selectedOption?.label || placeholder}</span>
+				<span className='leading-none'>
+					{selectedOption?.label || placeholder}
+				</span>
 				<HiChevronDown
 					className={clsx(
 						'transition-transform duration-200',
@@ -77,12 +77,9 @@ export function Select({
 				<div
 					className={clsx(
 						'absolute top-full left-0 z-50 mt-1',
-						'w-max min-w-full',
 						'rounded-md shadow-lg',
 						'bg-white dark:bg-gray-800',
-						'border border-gray-200 dark:border-gray-700',
-						'py-1',
-						'animate-in fade-in slide-in-from-top-2 duration-150'
+						'py-1'
 					)}
 				>
 					{options.map((option) => (
@@ -97,7 +94,7 @@ export function Select({
 								'w-full px-4 py-2 text-left text-sm',
 								'transition-colors',
 								option.value === value
-									? 'bg-accent text-white'
+									? 'bg-blue-500 text-white'
 									: 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
 							)}
 						>

@@ -29,8 +29,9 @@ type ButtonProps = BaseProps &
 	};
 
 const variantClasses: Record<ButtonVariant, string> = {
-	accent: 'bg-accent text-gray-50 shadow-sm',
-	primary: 'bg-primary text-inverse shadow-sm',
+	accent: 'bg-blue-500 text-gray-50 shadow-sm',
+	primary:
+		'bg-gray-900 dark:bg-gray-50 text-gray-50 dark:text-gray-900 shadow-sm',
 	outline:
 		'border border-gray-300 dark:border-gray-600 bg-transparent text-gray-700 dark:text-gray-200',
 	ghost: 'bg-transparent text-gray-600 dark:text-gray-300',
@@ -53,7 +54,7 @@ const minWidthClasses: Record<ButtonMinWidth, string> = {
 
 // Shared hover/focus styles applied to all variants.
 const sharedInteraction =
-	'hover:bg-gray-800 hover:text-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2';
+	'hover:bg-gray-800 hover:text-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2';
 
 // Base layout classes.
 const baseClasses =

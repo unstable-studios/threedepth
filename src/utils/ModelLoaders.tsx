@@ -4,6 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { OrthographicDepthMaterial } from './DepthMaterial';
 
 // Normalize object to fit in 20x20x20 cube with base at z=0
 // Then apply rotation to match the desired up axis
@@ -61,24 +62,34 @@ function normalizeObject(
 export function STLModel({
 	url,
 	upAxis = 'Z+',
+	showDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
+	showDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const geometry = useLoader(STLLoader, url);
 	const mesh = useMemo(() => {
-		const m = new THREE.Mesh(
-			geometry,
-			new THREE.MeshStandardMaterial({
-				color: '#ffffff',
-				roughness: 0.3,
-				metalness: 0.1,
-			})
-		);
-		return normalizeObject(m, upAxis);
-	}, [geometry, upAxis]);
+		const material = showDepth
+			? new OrthographicDepthMaterial()
+			: new THREE.MeshStandardMaterial({
+					color: '#d6d3d1',
+					roughness: 0.5,
+					metalness: 0.3,
+				});
+		const m = new THREE.Mesh(geometry, material);
+		const normalized = normalizeObject(m, upAxis);
+
+		// Set depth range based on actual model bounds
+		if (showDepth && material instanceof OrthographicDepthMaterial) {
+			const box = new THREE.Box3().setFromObject(normalized);
+			material.setDepthRange(box.min.z, box.max.z);
+		}
+
+		return normalized;
+	}, [geometry, upAxis, showDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -94,17 +105,29 @@ export function STLModel({
 export function GLTFModel({
 	url,
 	upAxis = 'Z+',
+	showDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
+	showDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const gltf = useLoader(GLTFLoader, url);
-	const normalized = useMemo(
-		() => normalizeObject(gltf.scene, upAxis),
-		[gltf.scene, upAxis]
-	);
+	const normalized = useMemo(() => {
+		const obj = normalizeObject(gltf.scene, upAxis);
+		if (showDepth) {
+			const box = new THREE.Box3().setFromObject(obj);
+			obj.traverse((child) => {
+				if (child instanceof THREE.Mesh) {
+					const depthMat = new OrthographicDepthMaterial();
+					depthMat.setDepthRange(box.min.z, box.max.z);
+					child.material = depthMat;
+				}
+			});
+		}
+		return obj;
+	}, [gltf.scene, upAxis, showDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -120,17 +143,29 @@ export function GLTFModel({
 export function OBJModel({
 	url,
 	upAxis = 'Z+',
+	showDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
+	showDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const model = useLoader(OBJLoader, url);
-	const normalized = useMemo(
-		() => normalizeObject(model, upAxis),
-		[model, upAxis]
-	);
+	const normalized = useMemo(() => {
+		const obj = normalizeObject(model, upAxis);
+		if (showDepth) {
+			const box = new THREE.Box3().setFromObject(obj);
+			obj.traverse((child) => {
+				if (child instanceof THREE.Mesh) {
+					const depthMat = new OrthographicDepthMaterial();
+					depthMat.setDepthRange(box.min.z, box.max.z);
+					child.material = depthMat;
+				}
+			});
+		}
+		return obj;
+	}, [model, upAxis, showDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -147,18 +182,41 @@ export function Model({
 	url,
 	format,
 	upAxis = 'Z+',
+	showDepth = false,
 	onReady,
 }: {
 	url: string;
 	format: 'gltf' | 'glb' | 'stl' | 'obj';
 	upAxis?: string;
+	showDepth?: boolean;
 	onReady?: () => void;
 }) {
 	if (format === 'stl')
-		return <STLModel url={url} upAxis={upAxis} onReady={onReady} />;
+		return (
+			<STLModel
+				url={url}
+				upAxis={upAxis}
+				showDepth={showDepth}
+				onReady={onReady}
+			/>
+		);
 	if (format === 'gltf' || format === 'glb')
-		return <GLTFModel url={url} upAxis={upAxis} onReady={onReady} />;
+		return (
+			<GLTFModel
+				url={url}
+				upAxis={upAxis}
+				showDepth={showDepth}
+				onReady={onReady}
+			/>
+		);
 	if (format === 'obj')
-		return <OBJModel url={url} upAxis={upAxis} onReady={onReady} />;
+		return (
+			<OBJModel
+				url={url}
+				upAxis={upAxis}
+				showDepth={showDepth}
+				onReady={onReady}
+			/>
+		);
 	return null;
 }

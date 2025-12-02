@@ -89,6 +89,7 @@ export default function Editor() {
 		'gltf' | 'glb' | 'stl' | 'obj' | null
 	>(null);
 	const [upAxis, setUpAxis] = useState<string>('Z+');
+	const [showDepth, setShowDepth] = useState<boolean>(true);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const { isDark } = useDarkMode();
@@ -137,6 +138,7 @@ export default function Editor() {
 		<main className='relative h-full w-full overflow-hidden'>
 			<ToolbarPortal>
 				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
+					<ThemeToggle />
 					<Button
 						size='lg'
 						variant='ghost'
@@ -152,12 +154,18 @@ export default function Editor() {
 						size='lg'
 					/>
 					<Button size='lg' variant='ghost' onClick={handleResetCamera}>
-						Reset Camera
+						Recenter
+					</Button>
+					<Button
+						size='lg'
+						variant={showDepth ? 'accent' : 'ghost'}
+						onClick={() => setShowDepth(!showDepth)}
+					>
+						{showDepth ? 'Show Model' : 'Show Depth'}
 					</Button>
 					<Button size='lg' variant='ghost'>
 						Export
 					</Button>
-					<ThemeToggle />
 				</div>
 			</ToolbarPortal>
 			<input
@@ -168,7 +176,7 @@ export default function Editor() {
 				className='hidden'
 			/>
 			<div className='absolute inset-0'>
-				<Canvas>
+				<Canvas camera={{ position: [0, 0, 30], near: 1, far: 100 }}>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
 
 					{/* Subtle infinite grid: follows camera and hints at scale */}
@@ -192,6 +200,7 @@ export default function Editor() {
 								url={modelUrl}
 								format={modelFormat}
 								upAxis={upAxis}
+								showDepth={showDepth}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						) : (
@@ -199,6 +208,7 @@ export default function Editor() {
 								url={defaultStlUrl}
 								format={'stl'}
 								upAxis={upAxis}
+								showDepth={showDepth}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						)}
@@ -207,7 +217,7 @@ export default function Editor() {
 					<ambientLight intensity={0.5} />
 					<directionalLight position={[5, 5, 5]} intensity={1.2} />
 					<directionalLight position={[-3, -3, 3]} intensity={0.6} />
-					<pointLight position={[0, 5, 0]} intensity={0.5} />
+					<pointLight position={[20, 50, 30]} intensity={0.6} />
 
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
