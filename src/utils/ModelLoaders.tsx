@@ -2,7 +2,7 @@ import { useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { normalizeObject, normalizeObjectInPlace } from './geometry';
 
@@ -36,9 +36,13 @@ export function STLModel({
 		[mesh, normalizeMode]
 	);
 
+	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
-		if (onReady) onReady();
-	}, [output, onReady]);
+		if (firedRef.current !== url) {
+			firedRef.current = url;
+			if (onReady) onReady();
+		}
+	}, [url, onReady]);
 	return <primitive object={output} />;
 }
 
@@ -59,9 +63,13 @@ export function GLTFModel({
 				: normalizeObject(gltf.scene),
 		[gltf.scene, normalizeMode]
 	);
+	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
-		if (onReady) onReady();
-	}, [normalized, onReady]);
+		if (firedRef.current !== url) {
+			firedRef.current = url;
+			if (onReady) onReady();
+		}
+	}, [url, onReady]);
 	return <primitive object={normalized} />;
 }
 
@@ -82,9 +90,13 @@ export function OBJModel({
 				: normalizeObject(model),
 		[model, normalizeMode]
 	);
+	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
-		if (onReady) onReady();
-	}, [normalized, onReady]);
+		if (firedRef.current !== url) {
+			firedRef.current = url;
+			if (onReady) onReady();
+		}
+	}, [url, onReady]);
 	return <primitive object={normalized} />;
 }
 
