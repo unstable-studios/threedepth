@@ -49,7 +49,7 @@ npm run deploy
 
 ### UI Components
 
-- Portal-based toolbar injection via `ToolbarPortal`
+- Portal-based toolbar injection via `Toolbar` component
 - Floating glass-morphic header with backdrop blur
 
 ### 3D Rendering

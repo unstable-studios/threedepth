@@ -4,7 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { OrthographicDepthMaterial } from './DepthMaterial';
+import { OrthographicDepthMaterial } from '../../utils/DepthMaterial';
 
 // Normalize object to fit in 20x20x20 cube with base at z=0
 // Then apply rotation to match the desired up axis

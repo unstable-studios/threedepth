@@ -12,11 +12,10 @@ import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
 import Toggle from './components/ui/Toggle';
 import { HiUpload } from 'react-icons/hi';
-import { Model } from './utils/ModelLoaders';
+import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
-import ThemeToggle from './components/ui/ThemeToggle';
 import { useDarkMode } from './hooks/useDarkMode';
-import ToolbarPortal from './utils/ToolbarPortal';
+import Toolbar from './components/ui/Toolbar';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 
@@ -72,10 +71,12 @@ function CameraController({
 		<CameraControls
 			ref={controlsRef}
 			makeDefault
-			minPolarAngle={Math.PI / 6}
+			/* Polar angle range (Pi) */
+			minPolarAngle={Math.PI * (1 / 6)}
 			maxPolarAngle={Math.PI * (5 / 6)}
-			minAzimuthAngle={-Math.PI / 3}
-			maxAzimuthAngle={Math.PI / 3}
+			/* Azimuth angle range (2Pi) */
+			minAzimuthAngle={Math.PI * (-3 / 8)}
+			maxAzimuthAngle={Math.PI * (3 / 8)}
 			minDistance={5}
 			maxDistance={60}
 			smoothTime={0.3}
@@ -155,9 +156,8 @@ export default function Editor() {
 
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
-			<ToolbarPortal>
+			<Toolbar>
 				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
-					<ThemeToggle />
 					<Button
 						size='lg'
 						variant='ghost'
@@ -192,7 +192,7 @@ export default function Editor() {
 						Export PNG
 					</Button>
 				</div>
-			</ToolbarPortal>
+			</Toolbar>
 			<input
 				ref={fileInputRef}
 				type='file'
