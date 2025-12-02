@@ -10,6 +10,7 @@ const { ACTION } = CameraControlsImpl;
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
+import Toggle from './components/ui/Toggle';
 import { HiUpload } from 'react-icons/hi';
 import { Model } from './utils/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
@@ -62,12 +63,13 @@ function CameraController({
 			ref={controlsRef}
 			makeDefault
 			minPolarAngle={Math.PI / 6}
-			maxPolarAngle={(Math.PI * 5) / 6}
+			maxPolarAngle={Math.PI * (5 / 6)}
 			minAzimuthAngle={-Math.PI / 3}
 			maxAzimuthAngle={Math.PI / 3}
 			minDistance={5}
 			maxDistance={60}
-			dampingFactor={0.1}
+			smoothTime={0.3}
+			draggingSmoothTime={0.12}
 			mouseButtons={{
 				left: ACTION.ROTATE,
 				middle: ACTION.DOLLY,
@@ -89,7 +91,9 @@ export default function Editor() {
 		'gltf' | 'glb' | 'stl' | 'obj' | null
 	>(null);
 	const [upAxis, setUpAxis] = useState<string>('Z+');
-	const [showDepth, setShowDepth] = useState<boolean>(true);
+	const [invertDepth, setInvertDepth] = useState<boolean>(false);
+	// const [showDepth, setShowDepth] = useState<boolean>(true);
+	const showDepth = true;
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const { isDark } = useDarkMode();
@@ -156,13 +160,19 @@ export default function Editor() {
 					<Button size='lg' variant='ghost' onClick={handleResetCamera}>
 						Recenter
 					</Button>
-					<Button
+					<Toggle
+						isOn={invertDepth}
+						handleToggle={() => setInvertDepth(!invertDepth)}
+						label='Invert'
+						labelRight
+					/>
+					{/* <Button
 						size='lg'
 						variant={showDepth ? 'accent' : 'ghost'}
 						onClick={() => setShowDepth(!showDepth)}
 					>
 						{showDepth ? 'Show Model' : 'Show Depth'}
-					</Button>
+					</Button> */}
 					<Button size='lg' variant='ghost'>
 						Export
 					</Button>
@@ -201,6 +211,7 @@ export default function Editor() {
 								format={modelFormat}
 								upAxis={upAxis}
 								showDepth={showDepth}
+								invertDepth={invertDepth}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						) : (
@@ -209,6 +220,7 @@ export default function Editor() {
 								format={'stl'}
 								upAxis={upAxis}
 								showDepth={showDepth}
+								invertDepth={invertDepth}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						)}

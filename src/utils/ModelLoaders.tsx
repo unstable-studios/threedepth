@@ -63,11 +63,13 @@ export function STLModel({
 	url,
 	upAxis = 'Z+',
 	showDepth = false,
+	invertDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
+	invertDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const geometry = useLoader(STLLoader, url);
@@ -86,10 +88,11 @@ export function STLModel({
 		if (showDepth && material instanceof OrthographicDepthMaterial) {
 			const box = new THREE.Box3().setFromObject(normalized);
 			material.setDepthRange(box.min.z, box.max.z);
+			material.setInvert(invertDepth);
 		}
 
 		return normalized;
-	}, [geometry, upAxis, showDepth]);
+	}, [geometry, upAxis, showDepth, invertDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -106,11 +109,13 @@ export function GLTFModel({
 	url,
 	upAxis = 'Z+',
 	showDepth = false,
+	invertDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
+	invertDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const gltf = useLoader(GLTFLoader, url);
@@ -122,12 +127,13 @@ export function GLTFModel({
 				if (child instanceof THREE.Mesh) {
 					const depthMat = new OrthographicDepthMaterial();
 					depthMat.setDepthRange(box.min.z, box.max.z);
+					depthMat.setInvert(invertDepth);
 					child.material = depthMat;
 				}
 			});
 		}
 		return obj;
-	}, [gltf.scene, upAxis, showDepth]);
+	}, [gltf.scene, upAxis, showDepth, invertDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -144,11 +150,13 @@ export function OBJModel({
 	url,
 	upAxis = 'Z+',
 	showDepth = false,
+	invertDepth = false,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
+	invertDepth?: boolean;
 	onReady?: () => void;
 }) {
 	const model = useLoader(OBJLoader, url);
@@ -160,12 +168,13 @@ export function OBJModel({
 				if (child instanceof THREE.Mesh) {
 					const depthMat = new OrthographicDepthMaterial();
 					depthMat.setDepthRange(box.min.z, box.max.z);
+					depthMat.setInvert(invertDepth);
 					child.material = depthMat;
 				}
 			});
 		}
 		return obj;
-	}, [model, upAxis, showDepth]);
+	}, [model, upAxis, showDepth, invertDepth]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -183,12 +192,14 @@ export function Model({
 	format,
 	upAxis = 'Z+',
 	showDepth = false,
+	invertDepth = false,
 	onReady,
 }: {
 	url: string;
 	format: 'gltf' | 'glb' | 'stl' | 'obj';
 	upAxis?: string;
 	showDepth?: boolean;
+	invertDepth?: boolean;
 	onReady?: () => void;
 }) {
 	if (format === 'stl')
@@ -197,6 +208,7 @@ export function Model({
 				url={url}
 				upAxis={upAxis}
 				showDepth={showDepth}
+				invertDepth={invertDepth}
 				onReady={onReady}
 			/>
 		);
@@ -206,6 +218,7 @@ export function Model({
 				url={url}
 				upAxis={upAxis}
 				showDepth={showDepth}
+				invertDepth={invertDepth}
 				onReady={onReady}
 			/>
 		);
@@ -215,6 +228,7 @@ export function Model({
 				url={url}
 				upAxis={upAxis}
 				showDepth={showDepth}
+				invertDepth={invertDepth}
 				onReady={onReady}
 			/>
 		);

@@ -9,7 +9,7 @@ export default function Toggle({
 	label?: string;
 	labelRight?: boolean;
 }) {
-	const labelClass = 'text-gray-700 font-semibold text-xl';
+	const labelClass = 'text-gray-700 dark:text-gray-300 font-semibold text-md';
 	return (
 		<div className='flex items-center'>
 			{label && !labelRight && (
