@@ -1,7 +1,6 @@
 import { HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
 import clsx from 'clsx';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import Button from './Button';
 
 type ThemeOption = 'dark' | 'light' | 'system';
 
@@ -32,11 +31,8 @@ export default function ThemeToggle(
 	);
 
 	return (
-		<Button
-			type='button'
+		<button
 			onClick={handleClick}
-			variant='ghost'
-			size='md'
 			className={`group ${className}`}
 			aria-label={aria}
 			title={aria}
@@ -44,6 +40,6 @@ export default function ThemeToggle(
 		>
 			<HiOutlineMoon className={moonClass} />
 			<HiOutlineSun className={sunClass} />
-		</Button>
+		</button>
 	);
 }

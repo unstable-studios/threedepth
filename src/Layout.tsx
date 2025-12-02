@@ -7,9 +7,8 @@ import SiteFooter from './components/ui/SiteFooter';
 function Layout() {
 	useDarkMode(); // ensures html.dark toggles so Tailwind dark: works
 	return (
-		<div className='app-root flex h-screen flex-col'>
-			{/* Floating glass toolbar */}
-			<header className='app-header pointer-events-none absolute top-0 right-0 left-0 z-50 flex items-center justify-between px-6 py-4'>
+		<div className='flex h-screen flex-col'>
+			<header className='pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between px-6 py-4'>
 				<Menu />
 				<Toolbar>
 					{/* Toolbar slot: ToolbarItems will be portaled here */}

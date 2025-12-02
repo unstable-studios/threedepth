@@ -8,7 +8,6 @@ import {
 } from '@react-three/drei';
 const { ACTION } = CameraControlsImpl;
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
-import { Button } from './components/ui/Button';
 import { Select } from './components/ui/Select';
 import Toggle from './components/ui/Toggle';
 import { HiUpload } from 'react-icons/hi';
@@ -157,14 +156,9 @@ export default function Editor() {
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
 			<ToolbarItem>
-				<Button
-					size='lg'
-					variant='ghost'
-					onClick={handleFileImport}
-					icon={<HiUpload />}
-				>
-					Import Model
-				</Button>
+				<button className='glass' onClick={handleFileImport}>
+					<HiUpload /> Open Model
+				</button>
 			</ToolbarItem>
 			<ToolbarItem>
 				<Select
@@ -175,9 +169,9 @@ export default function Editor() {
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
-				<Button size='lg' variant='ghost' onClick={handleResetCamera}>
+				<button className='glass' onClick={handleResetCamera}>
 					Recenter
-				</Button>
+				</button>
 			</ToolbarItem>
 			<ToolbarItem>
 				<Toggle
@@ -188,18 +182,20 @@ export default function Editor() {
 				/>
 			</ToolbarItem>
 			{/* <ToolbarItem>
-				<Button
-					size='lg'
-					variant={showDepth ? 'accent' : 'ghost'}
+				<button
+					className='glass'
 					onClick={() => setShowDepth(!showDepth)}
 				>
 					{showDepth ? 'Show Model' : 'Show Depth'}
-				</Button>
+				</button>
 			</ToolbarItem> */}
 			<ToolbarItem>
-				<Button size='lg' variant='accent' onClick={handleExport}>
+				<button
+					className='glass hover:bg-accent dark:hover:bg-accent-dark'
+					onClick={handleExport}
+				>
 					Export PNG
-				</Button>
+				</button>
 			</ToolbarItem>
 			<input
 				ref={fileInputRef}

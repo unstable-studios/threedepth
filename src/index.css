@@ -1,9 +1,7 @@
 @import "tailwindcss";
 
 :root {
-
   color-scheme: light dark;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,12 +16,27 @@
 	}
 
 	body {
-		@apply bg-gray-200 text-gray-800;
+		@apply bg-background text-primary;
 		overscroll-behavior: none;
 	}
 
 	.dark body {
-		@apply bg-gray-900 text-gray-200;
+		@apply bg-background-dark text-primary-dark;
+	}
+}
+
+@layer components {
+	div.glass {
+		@apply bg-white/10 shadow-lg backdrop-blur-md dark:bg-black/20;
+	}
+
+	button {
+		@apply transition-colors flex items-center gap-2 rounded-xl px-4 py-2 text-lg font-semibold;
+	}
+
+	button.glass:hover,
+	Toggle.glass:hover {
+		@apply bg-white/20 dark:bg-black/30;
 	}
 }
 
@@ -46,4 +59,18 @@
 	--font-sans--font-feature-settings: 'ss01', 'ss03';
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 	--font-mono--font-feature-settings: 'zero', 'ss01', 'liga', 'dlig';
+	
+	--color-primary: var(--color-gray-900);
+	--color-secondary: var(--color-gray-600);
+	--color-accent: var(--color-blue-600);
+	--color-onaccent: var(--color-white);
+	/* --color-glass: alpha(var(--color-white), 0.1); */
+	--color-background: var(--color-gray-100);
+	
+	--color-primary-dark: var(--color-gray-100);
+	--color-secondary-dark: var(--color-gray-400);
+	--color-accent-dark: var(--color-blue-500);
+	--color-onaccent-dark: var(--color-white);
+	/* --color-glass-dark: alpha(var(--color-white), 0.1); */
+	--color-background-dark: var(--color-gray-800);
 }
