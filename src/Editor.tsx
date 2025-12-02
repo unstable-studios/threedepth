@@ -61,8 +61,13 @@ function CameraController({
 		<CameraControls
 			ref={controlsRef}
 			makeDefault
-			minPolarAngle={0}
-			maxPolarAngle={Math.PI / 2}
+			minPolarAngle={Math.PI / 6}
+			maxPolarAngle={(Math.PI * 5) / 6}
+			minAzimuthAngle={-Math.PI / 3}
+			maxAzimuthAngle={Math.PI / 3}
+			minDistance={5}
+			maxDistance={60}
+			dampingFactor={0.1}
 			mouseButtons={{
 				left: ACTION.ROTATE,
 				middle: ACTION.DOLLY,
@@ -169,8 +174,8 @@ export default function Editor() {
 					{/* Subtle infinite grid: follows camera and hints at scale */}
 					<Grid
 						infiniteGrid
-						fadeDistance={50}
-						fadeStrength={0.5}
+						fadeDistance={80}
+						fadeStrength={0.2}
 						cellSize={0.5}
 						cellThickness={0.7}
 						sectionSize={5}
@@ -179,7 +184,6 @@ export default function Editor() {
 						sectionColor={isDark ? '#4b4b4d' : '#cbd5e1'}
 						position={[0, 0, -0.01]} // slight offset to avoid z-fighting
 						rotation={[Math.PI / 2, 0, 0]}
-						side={THREE.DoubleSide}
 					/>
 
 					<Suspense fallback={null}>
