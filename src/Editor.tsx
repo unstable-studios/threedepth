@@ -15,7 +15,7 @@ import { HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import { useDarkMode } from './hooks/useDarkMode';
-import Toolbar from './components/ui/Toolbar';
+import { ToolbarItem } from './components/ui/Toolbar';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 
@@ -156,43 +156,51 @@ export default function Editor() {
 
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
-			<Toolbar>
-				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
-					<Button
-						size='lg'
-						variant='ghost'
-						onClick={handleFileImport}
-						icon={<HiUpload />}
-					>
-						Import Model
-					</Button>
-					<Select
-						options={upAxisOptions}
-						value={upAxis}
-						onChange={handleUpAxisChange}
-						size='lg'
-					/>
-					<Button size='lg' variant='ghost' onClick={handleResetCamera}>
-						Recenter
-					</Button>
-					<Toggle
-						isOn={invertDepth}
-						handleToggle={() => setInvertDepth(!invertDepth)}
-						label='Invert'
-						labelRight
-					/>
-					{/* <Button
-						size='lg'
-						variant={showDepth ? 'accent' : 'ghost'}
-						onClick={() => setShowDepth(!showDepth)}
-					>
-						{showDepth ? 'Show Model' : 'Show Depth'}
-					</Button> */}
-					<Button size='lg' variant='accent' onClick={handleExport}>
-						Export PNG
-					</Button>
-				</div>
-			</Toolbar>
+			<ToolbarItem>
+				<Button
+					size='lg'
+					variant='ghost'
+					onClick={handleFileImport}
+					icon={<HiUpload />}
+				>
+					Import Model
+				</Button>
+			</ToolbarItem>
+			<ToolbarItem>
+				<Select
+					options={upAxisOptions}
+					value={upAxis}
+					onChange={handleUpAxisChange}
+					size='lg'
+				/>
+			</ToolbarItem>
+			<ToolbarItem>
+				<Button size='lg' variant='ghost' onClick={handleResetCamera}>
+					Recenter
+				</Button>
+			</ToolbarItem>
+			<ToolbarItem>
+				<Toggle
+					isOn={invertDepth}
+					handleToggle={() => setInvertDepth(!invertDepth)}
+					label='Invert'
+					labelRight
+				/>
+			</ToolbarItem>
+			{/* <ToolbarItem>
+				<Button
+					size='lg'
+					variant={showDepth ? 'accent' : 'ghost'}
+					onClick={() => setShowDepth(!showDepth)}
+				>
+					{showDepth ? 'Show Model' : 'Show Depth'}
+				</Button>
+			</ToolbarItem> */}
+			<ToolbarItem>
+				<Button size='lg' variant='accent' onClick={handleExport}>
+					Export PNG
+				</Button>
+			</ToolbarItem>
 			<input
 				ref={fileInputRef}
 				type='file'
