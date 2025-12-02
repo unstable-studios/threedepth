@@ -78,10 +78,10 @@ function CameraController({
 		const exportImage = () => {
 			if (!exportCameraRef.current) return;
 
-			// Calculate model bounds (only meshes, not grid)
+			// Calculate model bounds (only meshes; exclude helpers)
 			const box = new THREE.Box3();
 			scene.traverse((object) => {
-				if (object instanceof THREE.Mesh && !object.userData.isGrid) {
+				if (object instanceof THREE.Mesh && !object.userData?.isHelper) {
 					box.expandByObject(object);
 				}
 			});
@@ -115,12 +115,12 @@ function CameraController({
 			scene.background = null;
 
 			scene.traverse((object) => {
-				if (
-					object.type === 'GridHelper' ||
-					object.userData.isGrid ||
+				const isGizmo =
 					object.name === 'GizmoHelper' ||
-					object.parent?.name === 'GizmoHelper'
-				) {
+					object.parent?.name === 'GizmoHelper';
+				const isHelper =
+					!!object.userData?.isHelper || object.type === 'GridHelper';
+				if (isGizmo || isHelper) {
 					if (object.visible) {
 						hiddenObjects.push(object);
 						object.visible = false;
@@ -337,7 +337,7 @@ export default function Editor() {
 						sectionColor={isDark ? '#4b4b4d' : '#cbd5e1'}
 						position={[0, 0, -0.01]} // slight offset to avoid z-fighting
 						rotation={[Math.PI / 2, 0, 0]}
-						userData={{ isGrid: true }}
+						userData={{ isHelper: true }}
 					/>
 
 					<Suspense fallback={null}>
