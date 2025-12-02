@@ -2,40 +2,16 @@ import { useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { useEffect, useMemo, useRef } from 'react';
-import * as THREE from 'three';
-import { normalizeObject, normalizeObjectInPlace } from './geometry';
+import { useEffect, useRef } from 'react';
 
 export function STLModel({
 	url,
-	normalizeMode = 'clone',
 	onReady,
 }: {
 	url: string;
-	normalizeMode?: 'clone' | 'mutate';
 	onReady?: () => void;
 }) {
 	const geometry = useLoader(STLLoader, url);
-	const mesh = useMemo(
-		() =>
-			new THREE.Mesh(
-				geometry,
-				new THREE.MeshStandardMaterial({
-					color: '#ffffff',
-					roughness: 0.3,
-					metalness: 0.1,
-				})
-			),
-		[geometry]
-	);
-	const output = useMemo(
-		() =>
-			normalizeMode === 'mutate'
-				? normalizeObjectInPlace(mesh)
-				: normalizeObject(mesh),
-		[mesh, normalizeMode]
-	);
-
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
 		if (firedRef.current !== url) {
@@ -43,26 +19,22 @@ export function STLModel({
 			if (onReady) onReady();
 		}
 	}, [url, onReady]);
-	return <primitive object={output} />;
+
+	return (
+		<mesh geometry={geometry}>
+			<meshStandardMaterial color='#ffffff' roughness={0.3} metalness={0.1} />
+		</mesh>
+	);
 }
 
 export function GLTFModel({
 	url,
-	normalizeMode = 'clone',
 	onReady,
 }: {
 	url: string;
-	normalizeMode?: 'clone' | 'mutate';
 	onReady?: () => void;
 }) {
 	const gltf = useLoader(GLTFLoader, url);
-	const normalized = useMemo(
-		() =>
-			normalizeMode === 'mutate'
-				? normalizeObjectInPlace(gltf.scene)
-				: normalizeObject(gltf.scene),
-		[gltf.scene, normalizeMode]
-	);
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
 		if (firedRef.current !== url) {
@@ -70,26 +42,17 @@ export function GLTFModel({
 			if (onReady) onReady();
 		}
 	}, [url, onReady]);
-	return <primitive object={normalized} />;
+	return <primitive object={gltf.scene} />;
 }
 
 export function OBJModel({
 	url,
-	normalizeMode = 'clone',
 	onReady,
 }: {
 	url: string;
-	normalizeMode?: 'clone' | 'mutate';
 	onReady?: () => void;
 }) {
 	const model = useLoader(OBJLoader, url);
-	const normalized = useMemo(
-		() =>
-			normalizeMode === 'mutate'
-				? normalizeObjectInPlace(model)
-				: normalizeObject(model),
-		[model, normalizeMode]
-	);
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
 		if (firedRef.current !== url) {
@@ -97,31 +60,21 @@ export function OBJModel({
 			if (onReady) onReady();
 		}
 	}, [url, onReady]);
-	return <primitive object={normalized} />;
+	return <primitive object={model} />;
 }
 
 export function Model({
 	url,
 	format,
-	normalizeMode = 'clone',
 	onReady,
 }: {
 	url: string;
 	format: 'gltf' | 'glb' | 'stl' | 'obj';
-	normalizeMode?: 'clone' | 'mutate';
 	onReady?: () => void;
 }) {
-	if (format === 'stl')
-		return (
-			<STLModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
-		);
+	if (format === 'stl') return <STLModel url={url} onReady={onReady} />;
 	if (format === 'gltf' || format === 'glb')
-		return (
-			<GLTFModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
-		);
-	if (format === 'obj')
-		return (
-			<OBJModel url={url} normalizeMode={normalizeMode} onReady={onReady} />
-		);
+		return <GLTFModel url={url} onReady={onReady} />;
+	if (format === 'obj') return <OBJModel url={url} onReady={onReady} />;
 	return null;
 }

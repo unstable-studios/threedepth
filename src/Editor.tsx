@@ -1,10 +1,12 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import {
-	OrbitControls,
+	CameraControls,
+	CameraControlsImpl,
 	GizmoHelper,
 	GizmoViewport,
 	Grid,
 } from '@react-three/drei';
+const { ACTION } = CameraControlsImpl;
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Button } from './components/ui/Button';
 import { HiUpload } from 'react-icons/hi';
@@ -13,42 +15,64 @@ import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import ThemeToggle from './components/ui/ThemeToggle';
 import { useDarkMode } from './hooks/useDarkMode';
 import ToolbarPortal from './utils/ToolbarPortal';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
-import { computeSceneBoundingBox, computeCameraReset } from './utils/camera';
 
 function CameraController({
 	setResetFn,
 }: {
 	setResetFn: (fn: () => void) => void;
 }) {
-	const { camera, scene } = useThree();
-	const controlsRef = useRef<OrbitControlsImpl | null>(null);
+	const { scene } = useThree();
+	const controlsRef = useRef<CameraControls | null>(null);
 
 	useEffect(() => {
-		const reset = () => {
-			const box = computeSceneBoundingBox(scene as unknown as THREE.Scene);
-			const { position, target } = computeCameraReset(
-				box,
-				camera as THREE.PerspectiveCamera
-			);
-			camera.position.copy(position);
-			(camera as THREE.PerspectiveCamera).lookAt(target);
-			if (controlsRef.current) {
-				controlsRef.current.target.copy(target);
-				controlsRef.current.update();
+		const reset = async () => {
+			if (!controlsRef.current) return;
+			const box = new THREE.Box3();
+			scene.traverse((object) => {
+				if (object instanceof THREE.Mesh || object instanceof THREE.Group) {
+					box.expandByObject(object);
+				}
+			});
+			if (!box.isEmpty()) {
+				const center = box.getCenter(new THREE.Vector3());
+				const size = box.getSize(new THREE.Vector3());
+				const maxDim = Math.max(size.x, size.y, size.z);
+				const camera = controlsRef.current.camera;
+				const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180);
+				const distance = maxDim / (2 * Math.tan(fov / 2));
+
+				await controlsRef.current.setLookAt(
+					center.x,
+					center.y,
+					center.z + distance * 1.5, // 1.5x for padding
+					center.x,
+					center.y,
+					center.z,
+					true
+				);
 			}
 		};
 		setResetFn(reset);
-	}, [camera, scene, setResetFn]);
+	}, [scene, setResetFn]);
 
 	return (
-		<OrbitControls
+		<CameraControls
 			ref={controlsRef}
-			enableDamping
-			enablePan={false}
-			dampingFactor={0.05}
-			rotateSpeed={0.5}
+			makeDefault
+			minPolarAngle={0}
+			maxPolarAngle={Math.PI / 2}
+			mouseButtons={{
+				left: ACTION.ROTATE,
+				middle: ACTION.DOLLY,
+				right: ACTION.NONE,
+				wheel: ACTION.DOLLY,
+			}}
+			touches={{
+				one: ACTION.TOUCH_ROTATE,
+				two: ACTION.TOUCH_DOLLY,
+				three: ACTION.TOUCH_DOLLY,
+			}}
 		/>
 	);
 }
@@ -87,11 +111,8 @@ export default function Editor() {
 		setModelFormat(extension as 'gltf' | 'glb' | 'stl' | 'obj');
 	};
 
-	// no-op: toolbar content now rendered via portal below
-
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
-			{/* Toolbar content rendered into header via portal */}
 			<ToolbarPortal>
 				<div className='flex items-center gap-2 rounded-lg bg-white/10 px-2 py-2 shadow-lg backdrop-blur-md dark:bg-black/20'>
 					<Button
