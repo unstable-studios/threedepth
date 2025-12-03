@@ -7,6 +7,7 @@ import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import useDarkMode from './hooks/useDarkMode';
 import { ToolbarItem } from './components/ui/Toolbar';
+import { ExpandableButton } from './components/ui/ExpandableButton';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 import {
@@ -152,14 +153,18 @@ export default function Editor() {
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
 			<ToolbarItem>
-				<button onClick={handleFileImport}>
-					<HiUpload className='h-8 w-8' />
-				</button>
+				<ExpandableButton
+					icon={<HiUpload className='h-8 w-8' />}
+					label='Import'
+					onClick={handleFileImport}
+				/>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button className='' onClick={handleResetCamera}>
-					<MdOutlineCenterFocusStrong className='h-8 w-8' />
-				</button>
+				<ExpandableButton
+					icon={<MdOutlineCenterFocusStrong className='h-8 w-8' />}
+					label='Recenter'
+					onClick={handleResetCamera}
+				/>
 			</ToolbarItem>
 			<ToolbarItem>
 				<button
@@ -176,19 +181,25 @@ export default function Editor() {
 				</button>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button onClick={() => setInvertDepth(!invertDepth)} className=''>
-					<MdOutlineInvertColors
-						className={clsx(
-							'h-8 w-8 transition-transform',
-							invertDepth && '-scale-x-100'
-						)}
-					/>
-				</button>
+				<ExpandableButton
+					icon={
+						<MdOutlineInvertColors
+							className={clsx(
+								'h-8 w-8 transition-transform',
+								invertDepth && '-scale-x-100'
+							)}
+						/>
+					}
+					label='Invert'
+					onClick={() => setInvertDepth(!invertDepth)}
+				/>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button onClick={handleExport}>
-					<HiDownload className='h-8 w-8' />
-				</button>
+				<ExpandableButton
+					icon={<HiDownload className='h-8 w-8' />}
+					label='Export'
+					onClick={handleExport}
+				/>
 			</ToolbarItem>
 			<input
 				ref={fileInputRef}
