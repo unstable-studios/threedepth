@@ -6,7 +6,12 @@ import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import useDarkMode from './hooks/useDarkMode';
-import { ToolbarItem } from './components/ui/Toolbar';
+import {
+	ToolbarItem,
+	ToolbarDrawerItem,
+	openToolbarDrawer,
+	closeToolbarDrawer,
+} from './components/ui/Toolbar';
 import { ExpandableButton } from './components/ui/ExpandableButton';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
@@ -134,6 +139,8 @@ export default function Editor() {
 		setUpAxis(newAxis);
 		// Reset camera after a short delay to allow model to update
 		setTimeout(() => resetCameraRef.current?.(), 100);
+		// Close drawer after selection
+		closeToolbarDrawer();
 	}, []);
 
 	const handleExport = useCallback(() => {
@@ -174,19 +181,31 @@ export default function Editor() {
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button
-					onClick={() => {
-						handleUpAxisChange(
-							upAxisOptions[
-								(upAxisOptions.findIndex((opt) => opt.value === upAxis) + 1) %
-									upAxisOptions.length
-							].value
-						);
-					}}
-				>
-					<span className='text-xl font-bold'>{upAxis}</span>
-				</button>
+				<ExpandableButton
+					icon={<span className='text-xl font-bold'>{upAxis}</span>}
+					label='Invert'
+					onClick={() => openToolbarDrawer()}
+				/>
 			</ToolbarItem>
+
+			{/* Drawer contents: Up Axis options */}
+			<ToolbarDrawerItem>
+				<div className='flex items-center gap-2'>
+					{upAxisOptions.map((option) => (
+						<button
+							key={option.value}
+							className={clsx(
+								'glass text-md rounded-lg px-3 py-2 font-semibold',
+								option.value === upAxis &&
+									'bg-accent dark:bg-accent-dark text-onaccent dark:text-onaccent-dark'
+							)}
+							onClick={() => handleUpAxisChange(option.value)}
+						>
+							{option.label}
+						</button>
+					))}
+				</div>
+			</ToolbarDrawerItem>
 			<ToolbarItem>
 				<ExpandableButton
 					icon={
