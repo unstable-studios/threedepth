@@ -175,16 +175,21 @@ export default function Editor() {
 			</ToolbarItem>
 			<ToolbarItem>
 				<ExpandableButton
-					icon={<MdOutlineCenterFocusStrong className='h-8 w-8' />}
-					label='Recenter'
-					onClick={handleResetCamera}
+					id='depth-axis'
+					icon={
+						<span className='flex h-8 w-8 items-center justify-center text-xl font-bold'>
+							{upAxis}
+						</span>
+					}
+					label='Depth Axis'
+					onClick={() => openToolbarDrawer('depth-axis')}
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
 				<ExpandableButton
-					icon={<span className='text-xl font-bold'>{upAxis}</span>}
-					label='Invert'
-					onClick={() => openToolbarDrawer()}
+					icon={<MdOutlineCenterFocusStrong className='h-8 w-8' />}
+					label='Recenter'
+					onClick={handleResetCamera}
 				/>
 			</ToolbarItem>
 
