@@ -2,7 +2,6 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Outlet } from 'react-router';
 import { CameraControls, CameraControlsImpl, Grid } from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
-import { Select } from './components/ui/Select';
 import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
@@ -153,24 +152,31 @@ export default function Editor() {
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
 			<ToolbarItem>
-				<button className='glass' onClick={handleFileImport}>
+				<button onClick={handleFileImport}>
 					<HiUpload className='h-8 w-8' />
 				</button>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button className='glass' onClick={handleResetCamera}>
+				<button className='' onClick={handleResetCamera}>
 					<MdOutlineCenterFocusStrong className='h-8 w-8' />
 				</button>
 			</ToolbarItem>
 			<ToolbarItem>
-				<Select
-					options={upAxisOptions}
-					value={upAxis}
-					onChange={handleUpAxisChange}
-				/>
+				<button
+					onClick={() => {
+						handleUpAxisChange(
+							upAxisOptions[
+								(upAxisOptions.findIndex((opt) => opt.value === upAxis) + 1) %
+									upAxisOptions.length
+							].value
+						);
+					}}
+				>
+					<span className='text-xl font-bold'>{upAxis}</span>
+				</button>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button onClick={() => setInvertDepth(!invertDepth)} className='glass'>
+				<button onClick={() => setInvertDepth(!invertDepth)} className=''>
 					<MdOutlineInvertColors
 						className={clsx(
 							'h-8 w-8 transition-transform',
@@ -180,10 +186,7 @@ export default function Editor() {
 				</button>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button
-					className='glass hover:bg-accent dark:hover:bg-accent-dark'
-					onClick={handleExport}
-				>
+				<button onClick={handleExport}>
 					<HiDownload className='h-8 w-8' />
 				</button>
 			</ToolbarItem>

@@ -52,7 +52,7 @@ export function Modal({
 			<div
 				className={clsx(
 					'relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl p-6 shadow-2xl',
-					'text-primary dark:text-primary-dark glass bg-white/80 dark:bg-black/80',
+					'text-primary dark:text-primary-dark bg-white/80 dark:bg-black/80',
 					className
 				)}
 			>

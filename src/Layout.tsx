@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import useDarkMode from './hooks/useDarkMode';
-import Menu from './components/ui/Menu';
+import MainMenu from './components/ui/MainMenu';
 import Toolbar from './components/ui/Toolbar';
 
 function Layout() {
@@ -8,7 +8,7 @@ function Layout() {
 	return (
 		<div className='flex h-screen flex-col'>
 			<header className='pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between px-6 py-4'>
-				<Menu />
+				<MainMenu />
 				<Toolbar>
 					{/* Toolbar slot: ToolbarItems will be portaled here */}
 					<div id='app-toolbar-slot' className='contents'></div>

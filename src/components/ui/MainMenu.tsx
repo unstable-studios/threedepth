@@ -113,7 +113,7 @@ function MenuDivider() {
 	);
 }
 
-export default function Menu() {
+export default function MainMenu() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
@@ -156,7 +156,10 @@ export default function Menu() {
 		<div
 			onClick={() => setMenuOpen(!menuOpen)}
 			className={clsx(
-				'text-primary dark:text-primary-dark glass pointer-events-auto z-50 flex flex-col items-start justify-start gap-0 overflow-hidden rounded-xl transition-all duration-300',
+				'pointer-events-auto z-50 transition-all duration-300',
+				'text-primary dark:text-primary-dark',
+				'bg-glass dark:bg-glass-dark shadow-lg backdrop-blur-xs',
+				'flex flex-col items-start justify-start gap-0 overflow-hidden rounded-xl',
 				'cursor-pointer'
 			)}
 			ref={menuRef}
