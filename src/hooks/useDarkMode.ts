@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
-export function useDarkMode() {
+export default function useDarkMode() {
 	const getStoredTheme = (): Theme =>
 		(localStorage.getItem('theme') as Theme | null) || 'system';
 

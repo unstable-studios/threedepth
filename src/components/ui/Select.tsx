@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
-import { HiChevronDown } from 'react-icons/hi';
 
 interface SelectOption {
 	value: string;
@@ -49,26 +48,23 @@ export function Select({
 			<button
 				type='button'
 				onClick={() => setIsOpen(!isOpen)}
-				className={clsx('glass', className)}
+				className={clsx(
+					'glass',
+					isOpen && 'bg-white/30 dark:bg-black/50',
+					className
+				)}
 			>
-				<span className='leading-none'>
+				<div className='flex h-8 w-8 items-center justify-center text-xl leading-none'>
 					{selectedOption?.label || placeholder}
-				</span>
-				<HiChevronDown
-					className={clsx(
-						'transition-transform duration-200',
-						isOpen && 'rotate-180'
-					)}
-				/>
+				</div>
 			</button>
 
 			{isOpen && (
 				<div
 					className={clsx(
-						'absolute top-full left-0 z-50 mt-1',
-						'rounded-md shadow-lg',
-						'bg-white dark:bg-gray-800',
-						'py-1'
+						'absolute top-full right-0 z-120 mt-2',
+						'rounded-xl shadow-lg',
+						'glass flex px-2 py-2'
 					)}
 				>
 					{options.map((option) => (
@@ -80,7 +76,7 @@ export function Select({
 								setIsOpen(false);
 							}}
 							className={clsx(
-								'w-full px-4 py-2 text-left text-sm',
+								'w-full rounded-lg px-4 py-2 text-left text-xl',
 								'transition-colors',
 								option.value === value
 									? 'bg-blue-500 text-white'

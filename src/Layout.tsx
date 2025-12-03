@@ -1,8 +1,7 @@
 import { Outlet } from 'react-router';
-import { useDarkMode } from './hooks/useDarkMode';
+import useDarkMode from './hooks/useDarkMode';
 import Menu from './components/ui/Menu';
-import { Toolbar } from './components/ui/Toolbar';
-import SiteFooter from './components/ui/SiteFooter';
+import Toolbar from './components/ui/Toolbar';
 
 function Layout() {
 	useDarkMode(); // ensures html.dark toggles so Tailwind dark: works
@@ -18,7 +17,6 @@ function Layout() {
 
 			<div id='main-content' className='flex flex-1 flex-col'>
 				<Outlet />
-				<SiteFooter />
 			</div>
 		</div>
 	);

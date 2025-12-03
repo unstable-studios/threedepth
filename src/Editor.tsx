@@ -1,23 +1,22 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { Outlet } from 'react-router';
-import {
-	CameraControls,
-	CameraControlsImpl,
-	GizmoHelper,
-	GizmoViewport,
-	Grid,
-} from '@react-three/drei';
-const { ACTION } = CameraControlsImpl;
+import { CameraControls, CameraControlsImpl, Grid } from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { Select } from './components/ui/Select';
-import Toggle from './components/ui/Toggle';
-import { HiUpload } from 'react-icons/hi';
+import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
-import { useDarkMode } from './hooks/useDarkMode';
+import useDarkMode from './hooks/useDarkMode';
 import { ToolbarItem } from './components/ui/Toolbar';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
+import {
+	MdOutlineCenterFocusStrong,
+	MdOutlineInvertColors,
+} from 'react-icons/md';
+import clsx from 'clsx';
+
+const { ACTION } = CameraControlsImpl;
 
 function CameraController({
 	setResetFn,
@@ -28,9 +27,6 @@ function CameraController({
 }) {
 	const { scene, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
-	// No need for a persistent export camera; util creates a temp one
-
-	// Export camera handled inside export utility
 
 	useEffect(() => {
 		const reset = async () => {
@@ -111,12 +107,12 @@ export default function Editor() {
 	const { isDark } = useDarkMode();
 
 	const upAxisOptions = [
-		{ value: 'Z+', label: 'Up: Z+' },
-		{ value: 'Z-', label: 'Up: Z-' },
-		{ value: 'Y+', label: 'Up: Y+' },
-		{ value: 'Y-', label: 'Up: Y-' },
-		{ value: 'X+', label: 'Up: X+' },
-		{ value: 'X-', label: 'Up: X-' },
+		{ value: 'Z+', label: 'Z+' },
+		{ value: 'Z-', label: 'Z-' },
+		{ value: 'Y+', label: 'Y+' },
+		{ value: 'Y-', label: 'Y-' },
+		{ value: 'X+', label: 'X+' },
+		{ value: 'X-', label: 'X-' },
 	];
 
 	const handleFileImport = () => {
@@ -158,7 +154,12 @@ export default function Editor() {
 		<main className='relative h-full w-full overflow-hidden'>
 			<ToolbarItem>
 				<button className='glass' onClick={handleFileImport}>
-					<HiUpload /> Open Model
+					<HiUpload className='h-8 w-8' />
+				</button>
+			</ToolbarItem>
+			<ToolbarItem>
+				<button className='glass' onClick={handleResetCamera}>
+					<MdOutlineCenterFocusStrong className='h-8 w-8' />
 				</button>
 			</ToolbarItem>
 			<ToolbarItem>
@@ -169,32 +170,21 @@ export default function Editor() {
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
-				<button className='glass' onClick={handleResetCamera}>
-					Recenter
+				<button onClick={() => setInvertDepth(!invertDepth)} className='glass'>
+					<MdOutlineInvertColors
+						className={clsx(
+							'h-8 w-8 transition-transform',
+							invertDepth && '-scale-x-100'
+						)}
+					/>
 				</button>
 			</ToolbarItem>
-			<ToolbarItem>
-				<Toggle
-					isOn={invertDepth}
-					handleToggle={() => setInvertDepth(!invertDepth)}
-					label='Invert'
-					labelRight
-				/>
-			</ToolbarItem>
-			{/* <ToolbarItem>
-				<button
-					className='glass'
-					onClick={() => setShowDepth(!showDepth)}
-				>
-					{showDepth ? 'Show Model' : 'Show Depth'}
-				</button>
-			</ToolbarItem> */}
 			<ToolbarItem>
 				<button
 					className='glass hover:bg-accent dark:hover:bg-accent-dark'
 					onClick={handleExport}
 				>
-					Export PNG
+					<HiDownload className='h-8 w-8' />
 				</button>
 			</ToolbarItem>
 			<input
@@ -255,13 +245,6 @@ export default function Editor() {
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
 						setExportFn={(fn) => (exportRef.current = fn)}
 					/>
-
-					<GizmoHelper alignment='bottom-right' margin={[80, 80]}>
-						<GizmoViewport
-							axisColors={['#ff4444', '#44ff44', '#4444ff']}
-							labelColor='white'
-						/>
-					</GizmoHelper>
 				</Canvas>
 			</div>
 			<Outlet />

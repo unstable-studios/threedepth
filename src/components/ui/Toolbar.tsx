@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 // Main Toolbar container in Layout - just the styled wrapper
-export function Toolbar({ children }: { children?: ReactNode }) {
+export default function Toolbar({ children }: { children?: ReactNode }) {
 	return (
 		<div className='glass pointer-events-auto flex items-center gap-2 rounded-xl px-2 py-2'>
 			{children}

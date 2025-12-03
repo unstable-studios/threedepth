@@ -7,7 +7,8 @@ import {
 	HiChevronRight,
 	HiCheck,
 } from 'react-icons/hi';
-import { useDarkMode } from '../../hooks/useDarkMode';
+
+import useDarkMode from '../../hooks/useDarkMode';
 
 function AnimatedMenuIcon({
 	isOpen,
@@ -82,13 +83,13 @@ function MenuItem({
 			onClick={onClick}
 			disabled={disabled}
 			className={clsx(
-				'text-primary dark:text-primary-dark w-full rounded-md px-3 py-2 text-left text-sm transition-colors',
+				'text-primary dark:text-primary-dark text-md w-full rounded-md px-3 py-2 text-left transition-colors',
 				disabled
 					? 'cursor-not-allowed opacity-50'
-					: 'hover:bg-accent dark:hover:bg-accent-dark hover:text-white dark:hover:text-white'
+					: 'hover:bg-accent dark:hover:bg-accent-dark hover:text-onaccent dark:hover:text-onaccent-dark'
 			)}
 		>
-			<span className='flex items-center justify-between gap-2'>
+			<span className={clsx('flex items-center justify-between gap-2')}>
 				<span className='flex items-center gap-2'>
 					{variant === 'toggle' && (
 						<span className='w-4'>
@@ -155,7 +156,7 @@ export default function Menu() {
 		<div
 			onClick={() => setMenuOpen(!menuOpen)}
 			className={clsx(
-				'text-primary dark:text-primary-dark glass pointer-events-auto z-50 flex flex-col items-start justify-start gap-0 rounded-xl transition-all duration-300',
+				'text-primary dark:text-primary-dark glass pointer-events-auto z-50 flex flex-col items-start justify-start gap-0 overflow-hidden rounded-xl transition-all duration-300',
 				'cursor-pointer'
 			)}
 			ref={menuRef}
@@ -173,21 +174,22 @@ export default function Menu() {
 			<div
 				className={clsx(
 					'grid w-full transition-all duration-300 ease-in-out',
-					menuOpen
-						? 'mt-4 grid-rows-[1fr] opacity-100'
-						: 'mt-0 grid-rows-[0fr] opacity-0'
+					menuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
 				)}
 			>
-				<div className='flex w-full flex-col overflow-hidden px-3 pb-3'>
-					<div className='flex flex-col gap-0.5'>
-						<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
-						<MenuDivider />
-						<MenuItem
-							icon={<HiOutlineInformationCircle />}
-							label='About'
-							onClick={() => navigate('/about')}
-						/>
-					</div>
+				<div className='flex w-full flex-col overflow-hidden px-2 pb-2'>
+					<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
+					<MenuDivider />
+					<MenuItem
+						icon={<HiOutlineInformationCircle />}
+						label='About'
+						onClick={() => navigate('/about')}
+					/>
+					<MenuItem label='Help' onClick={() => navigate('/help')} />
+					<MenuItem
+						label='Privacy Policy'
+						onClick={() => navigate('/privacy')}
+					/>
 				</div>
 			</div>
 		</div>
