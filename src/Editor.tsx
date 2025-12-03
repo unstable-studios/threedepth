@@ -40,14 +40,21 @@ function CameraController({
 			if (!box.isEmpty()) {
 				const center = box.getCenter(new THREE.Vector3());
 				const size = box.getSize(new THREE.Vector3());
-				const maxDim = Math.max(size.x, size.y, size.z);
 				const cam = controlsRef.current.camera as THREE.PerspectiveCamera;
-				const fov = cam.fov * (Math.PI / 180);
-				const distance = maxDim / (2 * Math.tan(fov / 2));
+				const aspect = cam.aspect || gl.domElement.width / gl.domElement.height;
+				const fov = cam.fov * (Math.PI / 180); // vertical fov in radians
+
+				// Compute required distance to fit both vertical and horizontal extents
+				const halfHeight = size.y / 2;
+				const halfWidth = size.x / 2;
+				const distVert = halfHeight / Math.tan(fov / 2);
+				const distHorz = halfWidth / Math.tan(fov / 2) / aspect;
+				const distance = Math.max(distVert, distHorz) + size.z; // add some depth margin
+
 				await controlsRef.current.setLookAt(
 					center.x,
 					center.y,
-					center.z + distance * 1.5,
+					center.z + distance * 1.2,
 					center.x,
 					center.y,
 					center.z,

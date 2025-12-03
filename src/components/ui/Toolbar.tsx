@@ -21,7 +21,26 @@ export function ToolbarItem({ children }: { children: ReactNode }) {
 	const [el, setEl] = useState<HTMLElement | null>(null);
 
 	useEffect(() => {
-		setEl(document.getElementById('app-toolbar-slot'));
+		// Find all potential slots (desktop+mobile) and pick the visible one
+		const slots = Array.from(
+			document.querySelectorAll<HTMLElement>('#app-toolbar-slot')
+		);
+		// Choose the slot that is currently rendered and visible
+		const visible =
+			slots.find((node) => node.offsetParent !== null) || slots[0] || null;
+		setEl(visible);
+
+		// Re-evaluate on resize since responsive layout can swap slots
+		const onResize = () => {
+			const slots = Array.from(
+				document.querySelectorAll<HTMLElement>('#app-toolbar-slot')
+			);
+			const visible =
+				slots.find((node) => node.offsetParent !== null) || slots[0] || null;
+			setEl(visible);
+		};
+		window.addEventListener('resize', onResize);
+		return () => window.removeEventListener('resize', onResize);
 	}, []);
 
 	if (!el) return null;
