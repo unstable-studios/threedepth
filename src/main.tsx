@@ -3,13 +3,21 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import Layout from './Layout';
 import Editor from './Editor';
+import About from './pages/About';
+import Help from './pages/Help';
+import Privacy from './pages/Privacy';
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<BrowserRouter>
 			<Routes>
 				<Route element={<Layout />}>
-					<Route index element={<Editor />} />
+					{/* Editor is the base content; child routes render as modals over it */}
+					<Route path='/' element={<Editor />}>
+						<Route path='about' element={<About />} />
+						<Route path='help' element={<Help />} />
+						<Route path='privacy' element={<Privacy />} />
+					</Route>
 				</Route>
 			</Routes>
 		</BrowserRouter>

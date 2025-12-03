@@ -10,7 +10,7 @@
           var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           var resolvedDark = stored ? stored === 'dark' : prefersDark;
           if (resolvedDark) document.documentElement.classList.add('dark');
-          var bg = resolvedDark ? '#292524' : '#e7e5e4';
+          var bg = resolvedDark ? '#1a1a1a' : '#f8fafc';
           document.documentElement.style.backgroundColor = bg;
           document.body && (document.body.style.backgroundColor = bg);
         } catch (e) { /* ignore */ }

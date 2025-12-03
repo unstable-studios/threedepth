@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 import ThreeDepthLogo from '../../assets/2d/ThreeDepthLogo.svg?react';
-import { HiInformationCircle, HiChevronRight, HiCheck } from 'react-icons/hi';
+import {
+	HiOutlineInformationCircle,
+	HiChevronRight,
+	HiCheck,
+} from 'react-icons/hi';
 import { useDarkMode } from '../../hooks/useDarkMode';
-import { Modal } from './Modal';
 
 function AnimatedMenuIcon({
 	isOpen,
@@ -13,7 +17,7 @@ function AnimatedMenuIcon({
 	className?: string;
 }) {
 	return (
-		<button
+		<div
 			className={`text-primary dark:text-primary-dark relative h-6 w-6 p-0 ${className}`}
 			aria-label='Toggle menu'
 			style={{ transition: 'color 100ms ease-in-out' }}
@@ -47,7 +51,7 @@ function AnimatedMenuIcon({
 					}}
 				/>
 			</span>
-		</button>
+		</div>
 	);
 }
 
@@ -110,8 +114,8 @@ function MenuDivider() {
 
 export default function Menu() {
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [aboutOpen, setAboutOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
 	const { theme, setTheme } = useDarkMode();
 
 	const cycleTheme = () => {
@@ -148,74 +152,44 @@ export default function Menu() {
 	}, [menuOpen]);
 
 	return (
-		<>
-			<div
-				className={clsx(
-					'text-primary dark:text-primary-dark glass pointer-events-auto z-50 flex flex-col items-start justify-start gap-0 rounded-xl transition-all duration-300'
-				)}
-				ref={menuRef}
-			>
-				<div className='flex w-full items-center justify-between gap-4 px-6 py-4'>
-					<h1 className='flex items-center gap-2 text-2xl font-bold tracking-tight'>
-						<ThreeDepthLogo className='h-7 w-auto' />
-						ThreeDepth
-					</h1>
-					<div
-						onClick={() => setMenuOpen(!menuOpen)}
-						className='cursor-pointer'
-					>
-						<AnimatedMenuIcon isOpen={menuOpen} />
-					</div>
-				</div>
-
-				<div
-					className={clsx(
-						'grid w-full transition-all duration-300 ease-in-out',
-						menuOpen
-							? 'mt-4 grid-rows-[1fr] opacity-100'
-							: 'mt-0 grid-rows-[0fr] opacity-0'
-					)}
-				>
-					<div className='flex w-full flex-col overflow-hidden px-3 pb-3'>
-						<div className='flex flex-col gap-0.5'>
-							<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
-							<MenuDivider />
-							<MenuItem
-								icon={<HiInformationCircle />}
-								label='About'
-								onClick={() => setAboutOpen(true)}
-							/>
-						</div>
-					</div>
+		<div
+			onClick={() => setMenuOpen(!menuOpen)}
+			className={clsx(
+				'text-primary dark:text-primary-dark glass pointer-events-auto z-50 flex flex-col items-start justify-start gap-0 rounded-xl transition-all duration-300',
+				'cursor-pointer'
+			)}
+			ref={menuRef}
+		>
+			<div className='flex w-full items-center justify-between gap-4 px-6 py-4'>
+				<h1 className='flex items-center gap-2 text-2xl font-bold tracking-tight'>
+					<ThreeDepthLogo className='h-7 w-auto' />
+					ThreeDepth
+				</h1>
+				<div>
+					<AnimatedMenuIcon isOpen={menuOpen} />
 				</div>
 			</div>
 
-			<Modal
-				isOpen={aboutOpen}
-				onClose={() => setAboutOpen(false)}
-				title='About ThreeDepth'
+			<div
+				className={clsx(
+					'grid w-full transition-all duration-300 ease-in-out',
+					menuOpen
+						? 'mt-4 grid-rows-[1fr] opacity-100'
+						: 'mt-0 grid-rows-[0fr] opacity-0'
+				)}
 			>
-				<div className='flex flex-col gap-4'>
-					<p className='text-secondary dark:text-secondary-dark'>
-						ThreeDepth is a 3D model depth map generator. Import your 3D models
-						in STL, GLTF, GLB, or OBJ formats and export orthographic depth maps
-						as PNG images.
-					</p>
-					<div className='text-secondary dark:text-secondary-dark text-sm'>
-						<p className='mb-2 font-semibold'>Features:</p>
-						<ul className='ml-4 list-disc space-y-1'>
-							<li>Multiple 3D format support (STL, GLTF, GLB, OBJ)</li>
-							<li>Adjustable up-axis orientation</li>
-							<li>Invertible depth rendering</li>
-							<li>High-resolution PNG export with alpha channel</li>
-							<li>Real-time 3D preview with camera controls</li>
-						</ul>
-					</div>
-					<div className='text-secondary dark:text-secondary-dark border-secondary/20 dark:border-secondary-dark/20 border-t pt-4 text-xs'>
-						<p>Built with React, Three.js, and react-three-fiber</p>
+				<div className='flex w-full flex-col overflow-hidden px-3 pb-3'>
+					<div className='flex flex-col gap-0.5'>
+						<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
+						<MenuDivider />
+						<MenuItem
+							icon={<HiOutlineInformationCircle />}
+							label='About'
+							onClick={() => navigate('/about')}
+						/>
 					</div>
 				</div>
-			</Modal>
-		</>
+			</div>
+		</div>
 	);
 }

@@ -12,21 +12,15 @@ interface SelectProps {
 	value: string;
 	onChange: (value: string) => void;
 	placeholder?: string;
-	size?: 'sm' | 'md' | 'lg';
+	className?: string;
 }
-
-const sizeClasses = {
-	sm: 'text-xs px-2.5 py-1.5 gap-1',
-	md: 'text-sm px-4 py-2 gap-2',
-	lg: 'text-base px-5 py-3 gap-2.5',
-};
 
 export function Select({
 	options,
 	value,
 	onChange,
 	placeholder = 'Select...',
-	size = 'lg',
+	className,
 }: SelectProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -55,12 +49,7 @@ export function Select({
 			<button
 				type='button'
 				onClick={() => setIsOpen(!isOpen)}
-				className={clsx(
-					'inline-flex items-center justify-center gap-2 self-start rounded-md font-semibold transition-colors',
-					'bg-transparent text-gray-600 dark:text-gray-300',
-					'hover:bg-gray-800 hover:text-gray-50',
-					sizeClasses[size]
-				)}
+				className={clsx('glass', className)}
 			>
 				<span className='leading-none'>
 					{selectedOption?.label || placeholder}

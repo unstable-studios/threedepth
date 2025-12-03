@@ -27,7 +27,7 @@
 
 @layer components {
 	div.glass {
-		@apply bg-white/10 shadow-lg backdrop-blur-md dark:bg-black/20;
+		@apply bg-gray-500/20 shadow-lg backdrop-blur-md dark:bg-gray-700/30;
 	}
 
 	button {
@@ -36,7 +36,7 @@
 
 	button.glass:hover,
 	Toggle.glass:hover {
-		@apply bg-white/20 dark:bg-black/30;
+		@apply bg-white/30 dark:bg-black/50;
 	}
 }
 
@@ -64,13 +64,11 @@
 	--color-secondary: var(--color-gray-600);
 	--color-accent: var(--color-blue-600);
 	--color-onaccent: var(--color-white);
-	/* --color-glass: alpha(var(--color-white), 0.1); */
 	--color-background: var(--color-gray-100);
 	
 	--color-primary-dark: var(--color-gray-100);
-	--color-secondary-dark: var(--color-gray-400);
+	--color-secondary-dark: var(--color-gray-300);
 	--color-accent-dark: var(--color-blue-500);
 	--color-onaccent-dark: var(--color-white);
-	/* --color-glass-dark: alpha(var(--color-white), 0.1); */
 	--color-background-dark: var(--color-gray-800);
 }

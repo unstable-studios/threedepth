@@ -7,10 +7,17 @@ type ModalProps = {
 	isOpen: boolean;
 	onClose: () => void;
 	title?: string;
+	className?: string;
 	children: React.ReactNode;
 };
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({
+	isOpen,
+	onClose,
+	title,
+	children,
+	className,
+}: ModalProps) {
 	const modalRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -40,12 +47,13 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 	return createPortal(
 		<div
 			ref={modalRef}
-			className='fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm'
+			className='fixed inset-0 z-100 flex items-center justify-center backdrop-blur-xs'
 		>
 			<div
 				className={clsx(
-					'glass relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl p-6 shadow-2xl',
-					'text-primary dark:text-primary-dark'
+					'relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl p-6 shadow-2xl',
+					'text-primary dark:text-primary-dark glass bg-white/80 dark:bg-black/80',
+					className
 				)}
 			>
 				{/* Header */}

@@ -1,4 +1,5 @@
 import { Canvas, useThree } from '@react-three/fiber';
+import { Outlet } from 'react-router';
 import {
 	CameraControls,
 	CameraControlsImpl,
@@ -165,7 +166,6 @@ export default function Editor() {
 					options={upAxisOptions}
 					value={upAxis}
 					onChange={handleUpAxisChange}
-					size='lg'
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
@@ -264,6 +264,7 @@ export default function Editor() {
 					</GizmoHelper>
 				</Canvas>
 			</div>
+			<Outlet />
 		</main>
 	);
 }
