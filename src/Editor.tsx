@@ -1,14 +1,20 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { Outlet } from 'react-router';
 import { CameraControls, CameraControlsImpl, Grid } from '@react-three/drei';
-import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
+import {
+	useState,
+	useEffect,
+	useRef,
+	Suspense,
+	useCallback,
+	lazy,
+} from 'react';
 import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
 import {
 	DepthPreviewRenderer,
 	DepthPreviewUI,
 } from './components/DepthPreview';
-import { ExportDetails } from './pages/ExportDetails';
 import defaultStlUrl from './assets/3d/ThreeDepthCubes.stl?url';
 import useDarkMode from './hooks/useDarkMode';
 import {
@@ -28,6 +34,13 @@ import {
 	MdTune,
 } from 'react-icons/md';
 import clsx from 'clsx';
+
+// Lazy load the export modal to reduce initial bundle size
+const ExportDetails = lazy(() =>
+	import('./pages/ExportDetails').then((module) => ({
+		default: module.ExportDetails,
+	}))
+);
 
 const { ACTION } = CameraControlsImpl;
 
@@ -316,17 +329,19 @@ export default function Editor() {
 				onChange={handleFileChange}
 				className='hidden'
 			/>
-			<ExportDetails
-				isOpen={isExportModalOpen}
-				onClose={() => setIsExportModalOpen(false)}
-				scene={sceneData.scene}
-				gl={sceneData.gl}
-				previewCanvasRef={previewCanvasRef}
-				depthMin={depthMin}
-				depthMax={depthMax}
-				zScale={zScale}
-				invertDepth={invertDepth}
-			/>
+			<Suspense fallback={null}>
+				<ExportDetails
+					isOpen={isExportModalOpen}
+					onClose={() => setIsExportModalOpen(false)}
+					scene={sceneData.scene}
+					gl={sceneData.gl}
+					previewCanvasRef={previewCanvasRef}
+					depthMin={depthMin}
+					depthMax={depthMax}
+					zScale={zScale}
+					invertDepth={invertDepth}
+				/>
+			</Suspense>
 			<DepthPreviewUI canvasRef={previewCanvasRef} />
 			<div className='absolute inset-0'>
 				<Canvas camera={{ position: [0, 0, 30], near: 1, far: 100 }}>
