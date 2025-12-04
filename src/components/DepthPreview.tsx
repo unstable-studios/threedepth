@@ -181,23 +181,23 @@ export function DepthPreviewUI({
 }: {
 	canvasRef: React.RefObject<HTMLCanvasElement>;
 }) {
-	useEffect(() => {
-		if (!canvasRef.current) {
-			const canvas = document.createElement('canvas');
-			canvas.width = 256;
-			canvas.height = 256;
-			canvas.className = 'h-full w-full';
-			canvas.style.imageRendering = 'pixelated';
-			canvas.style.display = 'block';
-			(canvasRef as React.MutableRefObject<HTMLCanvasElement>).current = canvas;
-		}
-	}, [canvasRef]);
-
 	const setupCanvas = useCallback(
 		(container: HTMLDivElement | null) => {
-			if (!container || !canvasRef.current) return;
+			if (!container) return;
 
-			const canvas = canvasRef.current;
+			let canvas = canvasRef.current;
+			if (!canvas) {
+				canvas = document.createElement('canvas');
+				canvas.width = 256;
+				canvas.height = 256;
+				canvas.className = 'h-full w-full';
+				canvas.style.imageRendering = 'pixelated';
+				canvas.style.display = 'block';
+				(canvasRef as React.MutableRefObject<HTMLCanvasElement>).current =
+					canvas;
+				console.log('Created canvas for DepthPreviewUI');
+			}
+
 			if (canvas.parentElement !== container) {
 				container.appendChild(canvas);
 			}
