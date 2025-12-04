@@ -47,29 +47,35 @@ export function Modal({
 	return createPortal(
 		<div
 			ref={modalRef}
-			className='fixed inset-0 z-100 flex items-center justify-center backdrop-blur-xs'
+			onClick={(e) => {
+				if (e.target === e.currentTarget) onClose();
+			}}
+			className='fixed inset-0 z-100 flex items-start justify-center overflow-y-auto py-16 backdrop-blur-xs'
 		>
-			<div
-				className={clsx(
-					'relative mx-4 flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl p-6 shadow-2xl',
-					'text-primary dark:text-primary-dark bg-white/80 dark:bg-black/80',
-					className
-				)}
-			>
-				{/* Header */}
-				<div className='mb-4 flex items-center justify-between'>
-					{title && <h2 className='text-2xl font-bold'>{title}</h2>}
-					<button
-						onClick={onClose}
-						className='hover:bg-secondary/20 dark:hover:bg-secondary-dark/20 -mt-2 -mr-2 rounded-lg p-2 transition-colors'
-						aria-label='Close modal'
-					>
-						<HiX className='h-6 w-6' />
-					</button>
-				</div>
+			<div className='pointer-events-none w-full px-4'>
+				<div
+					onClick={(e) => e.stopPropagation()}
+					className={clsx(
+						'pointer-events-auto relative mx-auto flex w-full max-w-lg flex-col rounded-2xl p-6 shadow-2xl',
+						'text-primary dark:text-primary-dark bg-white/80 dark:bg-black/80',
+						className
+					)}
+				>
+					{/* Header */}
+					<div className='mb-4 flex items-center justify-between'>
+						{title && <h2 className='text-2xl font-bold'>{title}</h2>}
+						<button
+							onClick={onClose}
+							className='hover:bg-secondary/20 dark:hover:bg-secondary-dark/20 -mt-2 -mr-2 rounded-lg p-2 transition-colors'
+							aria-label='Close modal'
+						>
+							<HiX className='h-6 w-6' />
+						</button>
+					</div>
 
-				{/* Content */}
-				<div className='overflow-y-auto'>{children}</div>
+					{/* Content */}
+					<div>{children}</div>
+				</div>
 			</div>
 		</div>,
 		document.body

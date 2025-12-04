@@ -8,6 +8,7 @@ import {
 	DepthPreviewRenderer,
 	DepthPreviewUI,
 } from './components/DepthPreview';
+import { ExportDetails } from './pages/ExportDetails';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import useDarkMode from './hooks/useDarkMode';
 import {
@@ -37,15 +38,21 @@ function CameraController({
 	depthMin,
 	depthMax,
 	zScale,
+	setSceneFn,
 }: {
 	setResetFn: (fn: () => void) => void;
 	setExportFn: (fn: () => void) => void;
 	depthMin: number;
 	depthMax: number;
 	zScale: number;
+	setSceneFn: (scene: THREE.Scene, gl: THREE.WebGLRenderer) => void;
 }) {
 	const { scene, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
+
+	useEffect(() => {
+		setSceneFn(scene, gl);
+	}, [scene, gl, setSceneFn]);
 
 	useEffect(() => {
 		const reset = async () => {
@@ -128,6 +135,14 @@ export default function Editor() {
 	const [depthMin, setDepthMin] = useState<number>(0); // 0-1 normalized depth range
 	const [depthMax, setDepthMax] = useState<number>(1);
 	const [zScale, setZScale] = useState<number>(1); // Z-axis scale factor
+	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+	const [sceneData, setSceneData] = useState<{
+		scene: THREE.Scene | null;
+		gl: THREE.WebGLRenderer | null;
+	}>({
+		scene: null,
+		gl: null,
+	});
 	// const [showDepth, setShowDepth] = useState<boolean>(true);
 	const showDepth = true;
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -162,7 +177,7 @@ export default function Editor() {
 	}, []);
 
 	const handleExport = useCallback(() => {
-		exportRef.current?.();
+		setIsExportModalOpen(true);
 	}, []);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,6 +320,17 @@ export default function Editor() {
 				onChange={handleFileChange}
 				className='hidden'
 			/>
+			<ExportDetails
+				isOpen={isExportModalOpen}
+				onClose={() => setIsExportModalOpen(false)}
+				scene={sceneData.scene}
+				gl={sceneData.gl}
+				previewCanvasRef={previewCanvasRef}
+				depthMin={depthMin}
+				depthMax={depthMax}
+				zScale={zScale}
+				invertDepth={invertDepth}
+			/>
 			<DepthPreviewUI canvasRef={previewCanvasRef} />
 			<div className='absolute inset-0'>
 				<Canvas camera={{ position: [0, 0, 30], near: 1, far: 100 }}>
@@ -344,6 +370,7 @@ export default function Editor() {
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
 						setExportFn={(fn) => (exportRef.current = fn)}
+						setSceneFn={(scene, gl) => setSceneData({ scene, gl })}
 						depthMin={depthMin}
 						depthMax={depthMax}
 						zScale={zScale}

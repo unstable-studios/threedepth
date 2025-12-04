@@ -70,7 +70,12 @@ export default function Toolbar({ children }: { children?: ReactNode }) {
 				</div>
 				{/* Overlay to blur and block clicks on main toolbar while drawer is open */}
 				{drawerOpen && (
-					<div className='absolute inset-0 z-30 cursor-default bg-transparent backdrop-blur-[2px]' />
+					<div
+						onClick={() =>
+							window.dispatchEvent(new Event('toolbar-drawer:close'))
+						}
+						className='pointer-events-auto absolute inset-0 z-30 cursor-default bg-transparent backdrop-blur-[2px]'
+					/>
 				)}
 			</div>
 
