@@ -10,7 +10,8 @@ import { OrthographicDepthMaterial } from '../../utils/DepthMaterial';
 // Then apply rotation to match the desired up axis
 function normalizeObject(
 	object: THREE.Object3D,
-	upAxis: string = 'Z+'
+	upAxis: string = 'Z+',
+	zScale: number = 1
 ): THREE.Object3D {
 	const clone = object.clone();
 	const box = new THREE.Box3().setFromObject(clone);
@@ -56,7 +57,12 @@ function normalizeObject(
 	const finalBox = new THREE.Box3().setFromObject(rotationGroup);
 	rotationGroup.position.z = -finalBox.min.z;
 
-	return rotationGroup;
+	// Apply Z-scale
+	const scaleGroup = new THREE.Group();
+	scaleGroup.add(rotationGroup);
+	scaleGroup.scale.set(1, 1, zScale);
+
+	return scaleGroup;
 }
 
 export function STLModel({
@@ -66,6 +72,7 @@ export function STLModel({
 	invertDepth = false,
 	depthMin = 0,
 	depthMax = 1,
+	zScale = 1,
 	onReady,
 }: {
 	url: string;
@@ -74,6 +81,7 @@ export function STLModel({
 	invertDepth?: boolean;
 	depthMin?: number;
 	depthMax?: number;
+	zScale?: number;
 	onReady?: () => void;
 }) {
 	const geometry = useLoader(STLLoader, url);
@@ -86,7 +94,7 @@ export function STLModel({
 					metalness: 0.3,
 				});
 		const m = new THREE.Mesh(geometry, material);
-		const normalized = normalizeObject(m, upAxis);
+		const normalized = normalizeObject(m, upAxis, zScale);
 
 		// Set depth range based on actual model bounds
 		if (showDepth && material instanceof OrthographicDepthMaterial) {
@@ -97,7 +105,7 @@ export function STLModel({
 		}
 
 		return normalized;
-	}, [geometry, upAxis, showDepth, invertDepth, depthMin, depthMax]);
+	}, [geometry, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -117,6 +125,7 @@ export function GLTFModel({
 	invertDepth = false,
 	depthMin = 0,
 	depthMax = 1,
+	zScale = 1,
 	onReady,
 }: {
 	url: string;
@@ -125,11 +134,12 @@ export function GLTFModel({
 	invertDepth?: boolean;
 	depthMin?: number;
 	depthMax?: number;
+	zScale?: number;
 	onReady?: () => void;
 }) {
 	const gltf = useLoader(GLTFLoader, url);
 	const normalized = useMemo(() => {
-		const obj = normalizeObject(gltf.scene, upAxis);
+		const obj = normalizeObject(gltf.scene, upAxis, zScale);
 		if (showDepth) {
 			const box = new THREE.Box3().setFromObject(obj);
 			obj.traverse((child) => {
@@ -143,7 +153,7 @@ export function GLTFModel({
 			});
 		}
 		return obj;
-	}, [gltf.scene, upAxis, showDepth, invertDepth, depthMin, depthMax]);
+	}, [gltf.scene, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -163,6 +173,7 @@ export function OBJModel({
 	invertDepth = false,
 	depthMin = 0,
 	depthMax = 1,
+	zScale = 1,
 	onReady,
 }: {
 	url: string;
@@ -171,11 +182,12 @@ export function OBJModel({
 	invertDepth?: boolean;
 	depthMin?: number;
 	depthMax?: number;
+	zScale?: number;
 	onReady?: () => void;
 }) {
 	const model = useLoader(OBJLoader, url);
 	const normalized = useMemo(() => {
-		const obj = normalizeObject(model, upAxis);
+		const obj = normalizeObject(model, upAxis, zScale);
 		if (showDepth) {
 			const box = new THREE.Box3().setFromObject(obj);
 			obj.traverse((child) => {
@@ -189,7 +201,7 @@ export function OBJModel({
 			});
 		}
 		return obj;
-	}, [model, upAxis, showDepth, invertDepth, depthMin, depthMax]);
+	}, [model, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -210,6 +222,7 @@ export function Model({
 	invertDepth = false,
 	depthMin = 0,
 	depthMax = 1,
+	zScale = 1,
 	onReady,
 }: {
 	url: string;
@@ -219,6 +232,7 @@ export function Model({
 	invertDepth?: boolean;
 	depthMin?: number;
 	depthMax?: number;
+	zScale?: number;
 	onReady?: () => void;
 }) {
 	if (format === 'stl')
@@ -230,6 +244,7 @@ export function Model({
 				invertDepth={invertDepth}
 				depthMin={depthMin}
 				depthMax={depthMax}
+				zScale={zScale}
 				onReady={onReady}
 			/>
 		);
@@ -242,6 +257,7 @@ export function Model({
 				invertDepth={invertDepth}
 				depthMin={depthMin}
 				depthMax={depthMax}
+				zScale={zScale}
 				onReady={onReady}
 			/>
 		);
@@ -254,6 +270,7 @@ export function Model({
 				invertDepth={invertDepth}
 				depthMin={depthMin}
 				depthMax={depthMax}
+				zScale={zScale}
 				onReady={onReady}
 			/>
 		);

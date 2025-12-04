@@ -18,6 +18,7 @@ import {
 } from './components/ui/Toolbar';
 import { ExpandableButton } from './components/ui/ExpandableButton';
 import { RangeSlider } from './components/ui/RangeSlider';
+import { Slider } from './components/ui/Slider';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 import {
@@ -116,14 +117,15 @@ function CameraController({
 }
 
 export default function Editor() {
-	const [modelUrl, setModelUrl] = useState<string | null>(null);
+	const [modelUrl, setModelUrl] = useState<string>(defaultStlUrl);
 	const [modelFormat, setModelFormat] = useState<
-		'gltf' | 'glb' | 'stl' | 'obj' | null
-	>(null);
+		'gltf' | 'glb' | 'stl' | 'obj'
+	>('stl');
 	const [upAxis, setUpAxis] = useState<string>('Z+');
 	const [invertDepth, setInvertDepth] = useState<boolean>(false);
 	const [depthMin, setDepthMin] = useState<number>(0); // 0-1 normalized depth range
 	const [depthMax, setDepthMax] = useState<number>(1);
+	const [zScale, setZScale] = useState<number>(1); // Z-axis scale factor
 	// const [showDepth, setShowDepth] = useState<boolean>(true);
 	const showDepth = true;
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -201,16 +203,16 @@ export default function Editor() {
 			</ToolbarItem>
 			<ToolbarItem>
 				<ExpandableButton
-					id='depth-range'
+					id='fine-tune'
 					icon={<MdTune className='h-8 w-8' />}
-					label='Depth Range'
-					onClick={() => openToolbarDrawer('depth-range')}
+					label='Fine Tune'
+					onClick={() => openToolbarDrawer('fine-tune')}
 				/>
 			</ToolbarItem>
 
 			{/* Drawer contents: Depth Range slider */}
-			<ToolbarDrawerItem ownerId='depth-range'>
-				<div className='w-64 p-2'>
+			<ToolbarDrawerItem ownerId='fine-tune'>
+				<div className='flex w-64 flex-col gap-6 p-2'>
 					<RangeSlider
 						min={0}
 						max={1}
@@ -223,6 +225,14 @@ export default function Editor() {
 						step={0.01}
 						label='Depth Range'
 						inverted={invertDepth}
+					/>
+					<Slider
+						min={0.1}
+						max={3}
+						value={zScale}
+						onChange={setZScale}
+						step={0.1}
+						label='Z-Scale'
 					/>
 				</div>
 			</ToolbarDrawerItem>
@@ -303,29 +313,17 @@ export default function Editor() {
 						userData={{ isHelper: true }}
 					/>
 					<Suspense fallback={null}>
-						{modelUrl && modelFormat ? (
-							<Model
-								url={modelUrl}
-								format={modelFormat}
-								upAxis={upAxis}
-								showDepth={showDepth}
-								invertDepth={invertDepth}
-								depthMin={depthMin}
-								depthMax={depthMax}
-								onReady={() => resetCameraRef.current?.()}
-							/>
-						) : (
-							<Model
-								url={defaultStlUrl}
-								format={'stl'}
-								upAxis={upAxis}
-								showDepth={showDepth}
-								invertDepth={invertDepth}
-								depthMin={depthMin}
-								depthMax={depthMax}
-								onReady={() => resetCameraRef.current?.()}
-							/>
-						)}
+						<Model
+							url={modelUrl}
+							format={modelFormat}
+							upAxis={upAxis}
+							showDepth={showDepth}
+							invertDepth={invertDepth}
+							depthMin={depthMin}
+							depthMax={depthMax}
+							zScale={zScale}
+							onReady={() => resetCameraRef.current?.()}
+						/>
 					</Suspense>
 					<ambientLight intensity={0.5} />
 					<directionalLight position={[5, 5, 5]} intensity={1.2} />

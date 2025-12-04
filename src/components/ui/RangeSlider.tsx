@@ -89,7 +89,7 @@ export function RangeSlider({
 			{label && (
 				<div className='text-md flex items-center justify-between font-semibold'>
 					<span className='text-lg'>{label}</span>
-					<span className='text-muted dark:text-muted-dark'>
+					<span className='text-secondary dark:text-secondary-dark'>
 						{valueMin.toFixed(2)} – {valueMax.toFixed(2)}
 					</span>
 				</div>
@@ -98,7 +98,7 @@ export function RangeSlider({
 				{/* Track background */}
 				<div
 					ref={trackRef}
-					className='bg-surface-container dark:bg-surface-container-dark absolute top-1/2 h-2 w-full -translate-y-1/2 cursor-pointer rounded-full'
+					className='bg-secondary dark:bg-secondary-dark absolute top-1/2 h-2 w-full -translate-y-1/2 cursor-pointer rounded-full'
 				/>
 
 				{/* Active range */}
