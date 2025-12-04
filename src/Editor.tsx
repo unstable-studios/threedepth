@@ -9,7 +9,7 @@ import {
 	DepthPreviewUI,
 } from './components/DepthPreview';
 import { ExportDetails } from './pages/ExportDetails';
-import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
+import defaultStlUrl from './assets/3d/ThreeDepthCubes.stl?url';
 import useDarkMode from './hooks/useDarkMode';
 import {
 	ToolbarItem,
@@ -101,11 +101,11 @@ function CameraController({
 			ref={controlsRef}
 			makeDefault
 			/* Polar angle range (Pi) */
-			minPolarAngle={Math.PI * (1 / 6)}
-			maxPolarAngle={Math.PI * (5 / 6)}
+			minPolarAngle={0}
+			maxPolarAngle={Math.PI}
 			/* Azimuth angle range (2Pi) */
-			minAzimuthAngle={Math.PI * (-3 / 8)}
-			maxAzimuthAngle={Math.PI * (3 / 8)}
+			minAzimuthAngle={-Math.PI / 2}
+			maxAzimuthAngle={Math.PI / 2}
 			minDistance={5}
 			maxDistance={60}
 			smoothTime={0.3}
