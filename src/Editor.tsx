@@ -8,6 +8,7 @@ import {
 	Suspense,
 	useCallback,
 	lazy,
+	useMemo,
 } from 'react';
 import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
@@ -192,22 +193,66 @@ export default function Editor() {
 		setIsExportModalOpen(true);
 	}, []);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleCloseExport = useCallback(() => {
+		setIsExportModalOpen(false);
+	}, []);
 
-		const extension = file.name.split('.').pop()?.toLowerCase();
-		if (!extension || !['gltf', 'glb', 'stl', 'obj'].includes(extension)) {
-			alert(
-				'Unsupported file format. Please use GLTF, GLB, STL, or OBJ files.'
-			);
-			return;
-		}
+	const handleToggleInvertDepth = useCallback(() => {
+		setInvertDepth((prev) => !prev);
+	}, []);
 
-		const url = URL.createObjectURL(file);
-		setModelUrl(url);
-		setModelFormat(extension as 'gltf' | 'glb' | 'stl' | 'obj');
-	};
+	const handleOpenDepthAxisDrawer = useCallback(() => {
+		openToolbarDrawer('depth-axis');
+	}, []);
+
+	const handleOpenFineTuneDrawer = useCallback(() => {
+		openToolbarDrawer('fine-tune');
+	}, []);
+
+	const handleDepthRangeChange = useCallback((min: number, max: number) => {
+		setDepthMin(min);
+		setDepthMax(max);
+	}, []);
+
+	const handleResetDepthSettings = useCallback(() => {
+		setDepthMin(0);
+		setDepthMax(1);
+		setZScale(1);
+	}, []);
+
+	const handleFileChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const file = e.target.files?.[0];
+			if (!file) return;
+
+			const extension = file.name.split('.').pop()?.toLowerCase();
+			if (!extension || !['gltf', 'glb', 'stl', 'obj'].includes(extension)) {
+				alert(
+					'Unsupported file format. Please use GLTF, GLB, STL, or OBJ files.'
+				);
+				return;
+			}
+
+			const url = URL.createObjectURL(file);
+			setModelUrl(url);
+			setModelFormat(extension as 'gltf' | 'glb' | 'stl' | 'obj');
+		},
+		[]
+	);
+
+	// Memoize the file input to prevent re-renders
+	const fileInput = useMemo(
+		() => (
+			<input
+				ref={fileInputRef}
+				type='file'
+				accept='.gltf,.glb,.stl,.obj'
+				onChange={handleFileChange}
+				className='hidden'
+			/>
+		),
+		[handleFileChange]
+	);
 
 	return (
 		<main className='relative h-full w-full overflow-hidden'>
@@ -227,7 +272,7 @@ export default function Editor() {
 						</span>
 					}
 					label='Depth Axis'
-					onClick={() => openToolbarDrawer('depth-axis')}
+					onClick={handleOpenDepthAxisDrawer}
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
@@ -235,7 +280,7 @@ export default function Editor() {
 					id='fine-tune'
 					icon={<MdTune className='h-8 w-8' />}
 					label='Fine Tune'
-					onClick={() => openToolbarDrawer('fine-tune')}
+					onClick={handleOpenFineTuneDrawer}
 				/>
 			</ToolbarItem>
 
@@ -247,10 +292,7 @@ export default function Editor() {
 						max={1}
 						valueMin={depthMin}
 						valueMax={depthMax}
-						onChange={(min, max) => {
-							setDepthMin(min);
-							setDepthMax(max);
-						}}
+						onChange={handleDepthRangeChange}
 						step={0.01}
 						label='Depth Range'
 						inverted={invertDepth}
@@ -265,11 +307,7 @@ export default function Editor() {
 					/>
 					<button
 						className='text-md flex w-full items-center justify-center px-4 py-2 font-semibold'
-						onClick={() => {
-							setDepthMin(0);
-							setDepthMax(1);
-							setZScale(1);
-						}}
+						onClick={handleResetDepthSettings}
 					>
 						Reset
 					</button>
@@ -315,7 +353,7 @@ export default function Editor() {
 						/>
 					}
 					label='Invert'
-					onClick={() => setInvertDepth(!invertDepth)}
+					onClick={handleToggleInvertDepth}
 				/>
 			</ToolbarItem>
 			<ToolbarItem>
@@ -325,17 +363,11 @@ export default function Editor() {
 					onClick={handleExport}
 				/>
 			</ToolbarItem>
-			<input
-				ref={fileInputRef}
-				type='file'
-				accept='.gltf,.glb,.stl,.obj'
-				onChange={handleFileChange}
-				className='hidden'
-			/>
+			{fileInput}
 			<Suspense fallback={null}>
 				<ExportDetails
 					isOpen={isExportModalOpen}
-					onClose={() => setIsExportModalOpen(false)}
+					onClose={handleCloseExport}
 					scene={sceneData.scene}
 					gl={sceneData.gl}
 					previewCanvasRef={previewCanvasRef}
