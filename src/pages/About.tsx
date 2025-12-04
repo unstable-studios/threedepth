@@ -7,23 +7,23 @@ export default function About() {
 	return (
 		<Modal isOpen={true} onClose={() => navigate('/')} title='About ThreeDepth'>
 			<div className='flex flex-col gap-4'>
-				<p className='text-secondary dark:text-secondary-dark'>
-					ThreeDepth is a 3D model depth map generator. Import your 3D models in
-					STL, GLTF, GLB, or OBJ formats and export orthographic depth maps as
-					PNG images.
+				<p className='text-secondary dark:text-secondary-dark text-balance'>
+					ThreeDepth is a utility for converting 3D models to depth maps. Import
+					your 3D models in STL, GLTF, GLB, or OBJ formats and export perfect
+					depth maps as PNG images with transparent backgrounds.
 				</p>
-				<div className='text-secondary dark:text-secondary-dark text-sm'>
+				<div className='text-secondary dark:text-secondary-dark'>
 					<p className='mb-2 font-semibold'>Features:</p>
 					<ul className='ml-4 list-disc space-y-1'>
 						<li>Multiple 3D format support (STL, GLTF, GLB, OBJ)</li>
+						<li>Real-time 3D preview</li>
 						<li>Adjustable depth-axis orientation</li>
-						<li>Invertible depth rendering</li>
-						<li>High-resolution PNG export with alpha channel</li>
-						<li>Real-time 3D preview with camera controls</li>
+						<li>Customizable depth range masking</li>
+						<li>High-resolution PNG export</li>
 					</ul>
 				</div>
-				<div className='text-secondary dark:text-secondary-dark border-secondary/20 dark:border-secondary-dark/20 border-t pt-4 text-xs'>
-					<p>Built with React, Three.js, and react-three-fiber</p>
+				<div className='text-secondary dark:text-secondary-dark border-secondary/20 dark:border-secondary-dark/20 border-t pt-4'>
+					<p>Built with React, Three.js, and R3F</p>
 				</div>
 			</div>
 		</Modal>

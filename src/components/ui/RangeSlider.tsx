@@ -115,8 +115,8 @@ export function RangeSlider({
 					className={clsx(
 						'absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-grab transition-transform active:cursor-grabbing',
 						inverted
-							? 'text-gray-300 dark:text-gray-300' // inverted: min is light
-							: 'text-gray-600 dark:text-gray-700', // normal: min is dark
+							? 'text-gray-200 dark:text-gray-300' // inverted: min is light
+							: 'text-gray-400 dark:text-gray-500', // normal: min is dark
 						dragging === 'min' && 'scale-120'
 					)}
 					style={{ left: `${minPercent}%` }}
@@ -128,8 +128,8 @@ export function RangeSlider({
 					className={clsx(
 						'absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rotate-180 cursor-grab transition-transform active:cursor-grabbing',
 						inverted
-							? 'text-gray-600 dark:text-gray-700' // inverted: max is dark
-							: 'text-gray-300 dark:text-gray-300', // normal: max is light
+							? 'text-gray-400 dark:text-gray-500' // inverted: max is dark
+							: 'text-gray-200 dark:text-gray-300', // normal: max is light
 						dragging === 'max' && 'scale-120'
 					)}
 					style={{ left: `${maxPercent}%` }}

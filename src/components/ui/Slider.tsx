@@ -98,7 +98,7 @@ export function Slider({
 				{/* Thumb */}
 				<div
 					className={clsx(
-						'h-5 w-7 rounded-xs bg-gray-300 dark:bg-gray-300',
+						'h-5 w-7 rounded-xs bg-gray-200 dark:bg-gray-300',
 						'absolute top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-grab transition-transform active:cursor-grabbing',
 						dragging && 'scale-120'
 					)}

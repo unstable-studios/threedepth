@@ -236,6 +236,16 @@ export default function Editor() {
 						step={0.1}
 						label='Z-Scale'
 					/>
+					<button
+						className='text-md flex w-full items-center justify-center px-4 py-2 font-semibold'
+						onClick={() => {
+							setDepthMin(0);
+							setDepthMax(1);
+							setZScale(1);
+						}}
+					>
+						Reset
+					</button>
 				</div>
 			</ToolbarDrawerItem>
 			<ToolbarItem>
