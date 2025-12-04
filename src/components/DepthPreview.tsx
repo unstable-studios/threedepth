@@ -19,13 +19,7 @@ interface DepthPreviewProps {
 }
 
 // Component that runs inside Canvas and has access to Three.js context
-function DepthPreviewCanvas({
-	invertDepth,
-	depthMin,
-	depthMax,
-	zScale,
-	canvasRef,
-}: DepthPreviewProps) {
+function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 	const renderTargetRef = useRef<WebGLRenderTarget | null>(null);
 
 	useEffect(() => {

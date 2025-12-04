@@ -119,11 +119,6 @@ export function ExportDetails({
 	onClose,
 	scene,
 	gl,
-	previewCanvasRef,
-	depthMin,
-	depthMax,
-	zScale,
-	invertDepth,
 }: ExportDetailsProps) {
 	const [resolution, setResolution] = useState<512 | 1024 | 2048>(1024);
 	const [format, setFormat] = useState<'png' | 'jpg'>('png');

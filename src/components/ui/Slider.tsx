@@ -1,6 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
-import { PiTagSimpleFill } from 'react-icons/pi';
 
 interface SliderProps {
 	min: number;

@@ -3,9 +3,6 @@ import * as THREE from 'three';
 export function exportDepthPNG(
   scene: THREE.Scene,
   gl: THREE.WebGLRenderer,
-  depthMin: number = 0,
-  depthMax: number = 1,
-  zScale: number = 1
 ) {
   // Calculate model bounds (exclude helpers)
   const box = new THREE.Box3();

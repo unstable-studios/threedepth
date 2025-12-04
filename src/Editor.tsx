@@ -25,7 +25,6 @@ import { exportDepthPNG } from './utils/exportDepth';
 import {
 	MdOutlineCenterFocusStrong,
 	MdOutlineInvertColors,
-	MdRemoveRedEye,
 	MdTune,
 } from 'react-icons/md';
 import clsx from 'clsx';
@@ -35,9 +34,6 @@ const { ACTION } = CameraControlsImpl;
 function CameraController({
 	setResetFn,
 	setExportFn,
-	depthMin,
-	depthMax,
-	zScale,
 	setSceneFn,
 }: {
 	setResetFn: (fn: () => void) => void;
@@ -91,10 +87,10 @@ function CameraController({
 		setResetFn(reset);
 
 		const exportImage = () => {
-			exportDepthPNG(scene, gl, depthMin, depthMax, zScale);
+			exportDepthPNG(scene, gl);
 		};
 		setExportFn(exportImage);
-	}, [scene, setResetFn, setExportFn, gl, depthMin, depthMax, zScale]);
+	}, [scene, setResetFn, setExportFn, gl]);
 
 	return (
 		<CameraControls
@@ -148,7 +144,7 @@ export default function Editor() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const exportRef = useRef<(() => void) | null>(null);
-	const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+	const previewCanvasRef = useRef<HTMLCanvasElement>(null!);
 	const { isDark } = useDarkMode();
 
 	const upAxisOptions = [
