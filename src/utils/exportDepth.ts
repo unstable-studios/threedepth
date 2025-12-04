@@ -4,7 +4,8 @@ export function exportDepthPNG(
   scene: THREE.Scene,
   gl: THREE.WebGLRenderer,
   depthMin: number = 0,
-  depthMax: number = 1
+  depthMax: number = 1,
+  zScale: number = 1
 ) {
   // Calculate model bounds (exclude helpers)
   const box = new THREE.Box3();
@@ -67,31 +68,17 @@ export function exportDepthPNG(
     return;
   }
   const imageData = ctx.createImageData(renderSize, renderSize);
+  
+  // Copy pixels directly (shader already applied depth range + clipping)
   for (let y = 0; y < renderSize; y++) {
     for (let x = 0; x < renderSize; x++) {
       const flippedY = renderSize - 1 - y;
       const srcIdx = (flippedY * renderSize + x) * 4;
       const dstIdx = (y * renderSize + x) * 4;
-      
-      // Get original depth value (assuming grayscale)
-      const depthValue = pixels[srcIdx] / 255; // Normalize to 0-1
-      
-      // Remap depth based on custom range
-      let remappedDepth: number;
-      if (depthValue < depthMin) {
-        remappedDepth = 0; // Below min = black
-      } else if (depthValue > depthMax) {
-        remappedDepth = 1; // Above max = white
-      } else {
-        // Remap to 0-1 range
-        remappedDepth = (depthValue - depthMin) / (depthMax - depthMin);
-      }
-      
-      const finalValue = Math.round(remappedDepth * 255);
-      imageData.data[dstIdx] = finalValue;
-      imageData.data[dstIdx + 1] = finalValue;
-      imageData.data[dstIdx + 2] = finalValue;
-      imageData.data[dstIdx + 3] = pixels[srcIdx + 3]; // Preserve alpha
+      imageData.data[dstIdx] = pixels[srcIdx];
+      imageData.data[dstIdx + 1] = pixels[srcIdx + 1];
+      imageData.data[dstIdx + 2] = pixels[srcIdx + 2];
+      imageData.data[dstIdx + 3] = pixels[srcIdx + 3];
     }
   }
   ctx.putImageData(imageData, 0, 0);

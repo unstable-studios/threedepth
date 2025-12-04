@@ -99,7 +99,9 @@ export function STLModel({
 		// Set depth range based on actual model bounds
 		if (showDepth && material instanceof OrthographicDepthMaterial) {
 			const box = new THREE.Box3().setFromObject(normalized);
-			material.setDepthRange(box.min.z, box.max.z);
+			// Scale maxZ inversely: higher zScale = flatter depth map
+			const scaledMaxZ = box.min.z + (box.max.z - box.min.z) / zScale;
+			material.setDepthRange(box.min.z, scaledMaxZ);
 			material.setInvert(invertDepth);
 			material.setDepthClipRange(depthMin, depthMax);
 		}
@@ -142,10 +144,12 @@ export function GLTFModel({
 		const obj = normalizeObject(gltf.scene, upAxis, zScale);
 		if (showDepth) {
 			const box = new THREE.Box3().setFromObject(obj);
+			// Scale maxZ inversely: higher zScale = flatter depth map
+			const scaledMaxZ = box.min.z + (box.max.z - box.min.z) / zScale;
 			obj.traverse((child) => {
 				if (child instanceof THREE.Mesh) {
 					const depthMat = new OrthographicDepthMaterial();
-					depthMat.setDepthRange(box.min.z, box.max.z);
+					depthMat.setDepthRange(box.min.z, scaledMaxZ);
 					depthMat.setInvert(invertDepth);
 					depthMat.setDepthClipRange(depthMin, depthMax);
 					child.material = depthMat;
@@ -190,10 +194,12 @@ export function OBJModel({
 		const obj = normalizeObject(model, upAxis, zScale);
 		if (showDepth) {
 			const box = new THREE.Box3().setFromObject(obj);
+			// Scale maxZ inversely: higher zScale = flatter depth map
+			const scaledMaxZ = box.min.z + (box.max.z - box.min.z) / zScale;
 			obj.traverse((child) => {
 				if (child instanceof THREE.Mesh) {
 					const depthMat = new OrthographicDepthMaterial();
-					depthMat.setDepthRange(box.min.z, box.max.z);
+					depthMat.setDepthRange(box.min.z, scaledMaxZ);
 					depthMat.setInvert(invertDepth);
 					depthMat.setDepthClipRange(depthMin, depthMax);
 					child.material = depthMat;

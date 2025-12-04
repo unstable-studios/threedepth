@@ -36,11 +36,13 @@ function CameraController({
 	setExportFn,
 	depthMin,
 	depthMax,
+	zScale,
 }: {
 	setResetFn: (fn: () => void) => void;
 	setExportFn: (fn: () => void) => void;
 	depthMin: number;
 	depthMax: number;
+	zScale: number;
 }) {
 	const { scene, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
@@ -82,10 +84,10 @@ function CameraController({
 		setResetFn(reset);
 
 		const exportImage = () => {
-			exportDepthPNG(scene, gl, depthMin, depthMax);
+			exportDepthPNG(scene, gl, depthMin, depthMax, zScale);
 		};
 		setExportFn(exportImage);
-	}, [scene, setResetFn, setExportFn, gl, depthMin, depthMax]);
+	}, [scene, setResetFn, setExportFn, gl, depthMin, depthMax, zScale]);
 
 	return (
 		<CameraControls
@@ -334,11 +336,13 @@ export default function Editor() {
 						setExportFn={(fn) => (exportRef.current = fn)}
 						depthMin={depthMin}
 						depthMax={depthMax}
+						zScale={zScale}
 					/>{' '}
 					<DepthPreviewRenderer
 						invertDepth={invertDepth}
 						depthMin={depthMin}
 						depthMax={depthMax}
+						zScale={zScale}
 						canvasRef={previewCanvasRef}
 					/>
 				</Canvas>

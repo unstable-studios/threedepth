@@ -8,14 +8,13 @@ import {
 	WebGLRenderTarget,
 	Mesh,
 	Object3D,
-	Material,
 } from 'three';
-import { OrthographicDepthMaterial } from '../utils/DepthMaterial';
 
 interface DepthPreviewProps {
 	invertDepth: boolean;
 	depthMin: number; // 0-1 normalized depth range
 	depthMax: number;
+	zScale: number;
 	canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
@@ -24,6 +23,7 @@ function DepthPreviewCanvas({
 	invertDepth,
 	depthMin,
 	depthMax,
+	zScale,
 	canvasRef,
 }: DepthPreviewProps) {
 	const renderTargetRef = useRef<WebGLRenderTarget | null>(null);
@@ -84,22 +84,6 @@ function DepthPreviewCanvas({
 		ortho.lookAt(center.x, center.y, center.z);
 		ortho.updateProjectionMatrix();
 
-		// Swap materials to depth shader
-		const originalMaterials: Array<{
-			mesh: Mesh;
-			material: Material | Material[];
-		}> = [];
-		scene.traverse((object) => {
-			if (object instanceof Mesh && !object.userData?.isHelper) {
-				originalMaterials.push({ mesh: object, material: object.material });
-				const depthMat = new OrthographicDepthMaterial();
-				depthMat.setDepthRange(box.min.z, box.max.z);
-				depthMat.setInvert(invertDepth);
-				depthMat.setDepthClipRange(depthMin, depthMax);
-				object.material = depthMat;
-			}
-		});
-
 		// Hide helpers
 		const hidden: Object3D[] = [];
 		const originalBackground = scene.background;
@@ -126,11 +110,6 @@ function DepthPreviewCanvas({
 
 		// Restore helpers
 		hidden.forEach((obj) => (obj.visible = true));
-
-		// Restore original materials
-		originalMaterials.forEach(({ mesh, material }) => {
-			mesh.material = material;
-		});
 
 		// Read pixels
 		const pixels = new Uint8Array(renderSize * renderSize * 4);
@@ -214,6 +193,7 @@ export function DepthPreviewRenderer({
 	invertDepth,
 	depthMin,
 	depthMax,
+	zScale,
 	canvasRef,
 }: DepthPreviewProps) {
 	return (
@@ -221,6 +201,7 @@ export function DepthPreviewRenderer({
 			invertDepth={invertDepth}
 			depthMin={depthMin}
 			depthMax={depthMax}
+			zScale={zScale}
 			canvasRef={canvasRef}
 		/>
 	);
