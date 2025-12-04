@@ -61,8 +61,10 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 			return;
 		}
 
-		const size = box.getSize(new Vector3());
-		const center = box.getCenter(new Vector3());
+		const size = new Vector3();
+		const center = new Vector3();
+		box.getSize(size);
+		box.getCenter(center);
 		const maxDim = Math.max(size.x, size.y);
 
 		// Configure orthographic camera for depth view

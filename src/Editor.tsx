@@ -26,7 +26,8 @@ import {
 import { ExpandableButton } from './components/ui/ExpandableButton';
 import { RangeSlider } from './components/ui/RangeSlider';
 import { Slider } from './components/ui/Slider';
-import * as THREE from 'three';
+import { Box3, Vector3, Mesh, Group, PerspectiveCamera } from 'three';
+import type { Scene, WebGLRenderer } from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 import {
 	MdOutlineCenterFocusStrong,
@@ -54,7 +55,7 @@ function CameraController({
 	depthMin: number;
 	depthMax: number;
 	zScale: number;
-	setSceneFn: (scene: THREE.Scene, gl: THREE.WebGLRenderer) => void;
+	setSceneFn: (scene: Scene, gl: WebGLRenderer) => void;
 }) {
 	const { scene, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
@@ -66,16 +67,18 @@ function CameraController({
 	useEffect(() => {
 		const reset = async () => {
 			if (!controlsRef.current) return;
-			const box = new THREE.Box3();
+			const box = new Box3();
 			scene.traverse((object) => {
-				if (object instanceof THREE.Mesh || object instanceof THREE.Group) {
+				if (object instanceof Mesh || object instanceof Group) {
 					box.expandByObject(object);
 				}
 			});
 			if (!box.isEmpty()) {
-				const center = box.getCenter(new THREE.Vector3());
-				const size = box.getSize(new THREE.Vector3());
-				const cam = controlsRef.current.camera as THREE.PerspectiveCamera;
+				const center = new Vector3();
+				const size = new Vector3();
+				box.getCenter(center);
+				box.getSize(size);
+				const cam = controlsRef.current.camera as PerspectiveCamera;
 				const aspect = cam.aspect || gl.domElement.width / gl.domElement.height;
 				const fov = cam.fov * (Math.PI / 180); // vertical fov in radians
 
@@ -146,8 +149,8 @@ export default function Editor() {
 	const [zScale, setZScale] = useState<number>(1); // Z-axis scale factor
 	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 	const [sceneData, setSceneData] = useState<{
-		scene: THREE.Scene | null;
-		gl: THREE.WebGLRenderer | null;
+		scene: Scene | null;
+		gl: WebGLRenderer | null;
 	}>({
 		scene: null,
 		gl: null,

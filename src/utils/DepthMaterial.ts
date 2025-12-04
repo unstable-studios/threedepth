@@ -1,8 +1,8 @@
-import * as THREE from 'three';
+import { ShaderMaterial } from 'three';
 
 // Custom shader material that renders depth based on Z position
 // regardless of camera position/orientation
-export class OrthographicDepthMaterial extends THREE.ShaderMaterial {
+export class OrthographicDepthMaterial extends ShaderMaterial {
 	constructor() {
 		super({
 			vertexShader: `

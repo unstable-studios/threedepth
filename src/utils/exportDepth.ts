@@ -1,34 +1,38 @@
-import * as THREE from 'three';
+import { Box3, Vector3, OrthographicCamera, WebGLRenderTarget, Mesh, Object3D } from 'three';
+import type { Scene, WebGLRenderer } from 'three';
 
 export function exportDepthPNG(
-  scene: THREE.Scene,
-  gl: THREE.WebGLRenderer,
+  scene: Scene | null,
+  gl: WebGLRenderer | null,
 ) {
+  if (!scene || !gl) return;
   // Calculate model bounds (exclude helpers)
-  const box = new THREE.Box3();
+  const box = new Box3();
   scene.traverse((object) => {
-    if (object instanceof THREE.Mesh && !object.userData?.isHelper) {
+    if (object instanceof Mesh && !object.userData?.isHelper) {
       box.expandByObject(object);
     }
   });
   if (box.isEmpty()) return;
 
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
+  const size = new Vector3();
+  const center = new Vector3();
+  box.getSize(size);
+  box.getCenter(center);
   const maxDim = Math.max(size.x, size.y);
   const renderSize = 1024; // Fixed square output size
 
   // Configure a temporary orthographic camera
-  const ortho = new THREE.OrthographicCamera(-maxDim / 2, maxDim / 2, maxDim / 2, -maxDim / 2, 0.1, 1000);
+  const ortho = new OrthographicCamera(-maxDim / 2, maxDim / 2, maxDim / 2, -maxDim / 2, 0.1, 1000);
   ortho.position.set(center.x, center.y, box.max.z + 10);
   ortho.lookAt(center.x, center.y, center.z);
   ortho.updateProjectionMatrix();
 
   // Create offscreen render target
-  const renderTarget = new THREE.WebGLRenderTarget(renderSize, renderSize);
+  const renderTarget = new WebGLRenderTarget(renderSize, renderSize);
 
   // Hide helpers and set transparent background
-  const hidden: THREE.Object3D[] = [];
+  const hidden: Object3D[] = [];
   const originalBackground = scene.background;
   scene.background = null;
   scene.traverse((object) => {

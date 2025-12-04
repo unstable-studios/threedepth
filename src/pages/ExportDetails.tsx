@@ -2,7 +2,15 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import { Modal } from '../components/ui/Modal';
 import { HiCheck } from 'react-icons/hi';
 import clsx from 'clsx';
-import * as THREE from 'three';
+import {
+	Box3,
+	Vector3,
+	OrthographicCamera,
+	WebGLRenderTarget,
+	Mesh,
+	Object3D,
+} from 'three';
+import type { Scene, WebGLRenderer } from 'three';
 
 // Helper function to add DPI metadata to PNG
 async function addPNGMetadata(blob: Blob, dpi: number): Promise<Blob> {
@@ -105,8 +113,8 @@ function makeCRCTable(): Uint32Array {
 interface ExportDetailsProps {
 	isOpen: boolean;
 	onClose: () => void;
-	scene: THREE.Scene | null;
-	gl: THREE.WebGLRenderer | null;
+	scene: Scene | null;
+	gl: WebGLRenderer | null;
 	previewCanvasRef: React.RefObject<HTMLCanvasElement>;
 	depthMin: number;
 	depthMax: number;
@@ -140,20 +148,22 @@ export function ExportDetails({
 			canvas.width = renderSize;
 			canvas.height = renderSize;
 
-			const box = new THREE.Box3();
+			const box = new Box3();
 			scene.traverse((object) => {
-				if (object instanceof THREE.Mesh && !object.userData?.isHelper) {
+				if (object instanceof Mesh && !object.userData?.isHelper) {
 					box.expandByObject(object);
 				}
 			});
 
 			if (box.isEmpty()) return;
 
-			const size = box.getSize(new THREE.Vector3());
-			const center = box.getCenter(new THREE.Vector3());
+			const size = new Vector3();
+			const center = new Vector3();
+			box.getSize(size);
+			box.getCenter(center);
 			const maxDim = Math.max(size.x, size.y);
 
-			const ortho = new THREE.OrthographicCamera(
+			const ortho = new OrthographicCamera(
 				-maxDim / 2,
 				maxDim / 2,
 				maxDim / 2,
@@ -165,9 +175,9 @@ export function ExportDetails({
 			ortho.lookAt(center.x, center.y, center.z);
 			ortho.updateProjectionMatrix();
 
-			const renderTarget = new THREE.WebGLRenderTarget(renderSize, renderSize);
+			const renderTarget = new WebGLRenderTarget(renderSize, renderSize);
 
-			const hidden: THREE.Object3D[] = [];
+			const hidden: Object3D[] = [];
 			const originalBackground = scene.background;
 			scene.background = null;
 			scene.traverse((object) => {
@@ -279,11 +289,11 @@ export function ExportDetails({
 
 		try {
 			const renderSize = resolution;
-			const renderTarget = new THREE.WebGLRenderTarget(renderSize, renderSize);
+			const renderTarget = new WebGLRenderTarget(renderSize, renderSize);
 
-			const box = new THREE.Box3();
+			const box = new Box3();
 			scene.traverse((object) => {
-				if (object instanceof THREE.Mesh && !object.userData?.isHelper) {
+				if (object instanceof Mesh && !object.userData?.isHelper) {
 					box.expandByObject(object);
 				}
 			});
@@ -293,11 +303,13 @@ export function ExportDetails({
 				return;
 			}
 
-			const size = box.getSize(new THREE.Vector3());
-			const center = box.getCenter(new THREE.Vector3());
+			const size = new Vector3();
+			const center = new Vector3();
+			box.getSize(size);
+			box.getCenter(center);
 			const maxDim = Math.max(size.x, size.y);
 
-			const ortho = new THREE.OrthographicCamera(
+			const ortho = new OrthographicCamera(
 				-maxDim / 2,
 				maxDim / 2,
 				maxDim / 2,
@@ -309,7 +321,7 @@ export function ExportDetails({
 			ortho.lookAt(center.x, center.y, center.z);
 			ortho.updateProjectionMatrix();
 
-			const hidden: THREE.Object3D[] = [];
+			const hidden: Object3D[] = [];
 			const originalBackground = scene.background;
 			scene.background = null;
 			scene.traverse((object) => {
