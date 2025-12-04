@@ -142,6 +142,8 @@ export function ExportDetails({
 	useEffect(() => {
 		if (!isOpen || !scene || !gl) return;
 
+		let renderTarget: WebGLRenderTarget | null = null;
+
 		const generatePreview = () => {
 			const canvas = document.createElement('canvas');
 			const renderSize = 512; // Preview at 512px
@@ -155,7 +157,14 @@ export function ExportDetails({
 				}
 			});
 
-			if (box.isEmpty()) return;
+			if (box.isEmpty()) {
+				// Cleanup
+				if (renderTarget) {
+					renderTarget.dispose();
+					renderTarget = null;
+				}
+				return;
+			}
 
 			const size = new Vector3();
 			const center = new Vector3();
@@ -175,7 +184,11 @@ export function ExportDetails({
 			ortho.lookAt(center.x, center.y, center.z);
 			ortho.updateProjectionMatrix();
 
-			const renderTarget = new WebGLRenderTarget(renderSize, renderSize);
+			// Dispose old render target before creating new one
+			if (renderTarget) {
+				renderTarget.dispose();
+			}
+			renderTarget = new WebGLRenderTarget(renderSize, renderSize);
 
 			const hidden: Object3D[] = [];
 			const originalBackground = scene.background;
@@ -213,7 +226,10 @@ export function ExportDetails({
 
 			const ctx = canvas.getContext('2d');
 			if (!ctx) {
-				renderTarget.dispose();
+				if (renderTarget) {
+					renderTarget.dispose();
+					renderTarget = null;
+				}
 				return;
 			}
 
@@ -280,6 +296,14 @@ export function ExportDetails({
 		};
 
 		generatePreview();
+
+		// Cleanup function
+		return () => {
+			if (renderTarget) {
+				renderTarget.dispose();
+				renderTarget = null;
+			}
+		};
 	}, [isOpen, scene, gl, backgroundColor, customColor]);
 
 	const handleExport = useCallback(async () => {

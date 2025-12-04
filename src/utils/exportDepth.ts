@@ -87,6 +87,8 @@ export function exportDepthPNG(
   canvas.toBlob((blob) => {
     if (!blob) {
       renderTarget.dispose();
+      // Clear references
+      pixels.fill(0);
       return;
     }
     const url = URL.createObjectURL(blob);
@@ -94,7 +96,13 @@ export function exportDepthPNG(
     link.download = `depth-map-${Date.now()}.png`;
     link.href = url;
     link.click();
-    URL.revokeObjectURL(url);
-    renderTarget.dispose();
-  });
+    // Clean up after a delay to ensure click is registered
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      renderTarget.dispose();
+      // Clear references for GC
+      pixels.fill(0);
+      link.remove();
+    }, 100);
+  }, 'image/png');
 }

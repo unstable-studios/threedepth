@@ -21,6 +21,12 @@ interface DepthPreviewProps {
 // Component that runs inside Canvas and has access to Three.js context
 function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 	const renderTargetRef = useRef<WebGLRenderTarget | null>(null);
+	const orthoRef = useRef<OrthographicCamera | null>(null);
+	const pixelsRef = useRef<Uint8Array | null>(null);
+	const boxRef = useRef<Box3 | null>(null);
+	const sizeRef = useRef<Vector3 | null>(null);
+	const centerRef = useRef<Vector3 | null>(null);
+	const hiddenRef = useRef<Object3D[]>([]);
 
 	useEffect(() => {
 		return () => {
@@ -28,13 +34,19 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 				renderTargetRef.current.dispose();
 				renderTargetRef.current = null;
 			}
+			orthoRef.current = null;
+			pixelsRef.current = null;
+			boxRef.current = null;
+			sizeRef.current = null;
+			centerRef.current = null;
+			hiddenRef.current = [];
 		};
 	}, []);
 	useFrame(({ scene, gl }) => {
 		if (!canvasRef?.current) return;
 
 		const canvas = canvasRef.current;
-		const ctx = canvas.getContext('2d');
+		const ctx = canvas.getContext('2d', { willReadFrequently: true });
 		if (!ctx) return;
 
 		const renderSize = 256;
@@ -46,8 +58,32 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 
 		const renderTarget = renderTargetRef.current;
 
-		// Calculate model bounds
-		const box = new Box3();
+		// Lazy create reusable objects
+		if (!boxRef.current) boxRef.current = new Box3();
+		if (!sizeRef.current) sizeRef.current = new Vector3();
+		if (!centerRef.current) centerRef.current = new Vector3();
+		if (!pixelsRef.current)
+			pixelsRef.current = new Uint8Array(renderSize * renderSize * 4);
+		if (!orthoRef.current) {
+			orthoRef.current = new OrthographicCamera(
+				-128,
+				128,
+				128,
+				-128,
+				0.1,
+				1000
+			);
+		}
+
+		const box = boxRef.current;
+		const size = sizeRef.current;
+		const center = centerRef.current;
+		const pixels = pixelsRef.current;
+		const ortho = orthoRef.current;
+		const hidden = hiddenRef.current;
+
+		// Reset box but reuse object
+		box.makeEmpty();
 		scene.traverse((object) => {
 			if (object instanceof Mesh && !object.userData?.isHelper) {
 				box.expandByObject(object);
@@ -61,27 +97,21 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 			return;
 		}
 
-		const size = new Vector3();
-		const center = new Vector3();
 		box.getSize(size);
 		box.getCenter(center);
 		const maxDim = Math.max(size.x, size.y);
 
-		// Configure orthographic camera for depth view
-		const ortho = new OrthographicCamera(
-			-maxDim / 2,
-			maxDim / 2,
-			maxDim / 2,
-			-maxDim / 2,
-			0.1,
-			1000
-		);
+		// Update camera parameters instead of creating new one
+		ortho.left = -maxDim / 2;
+		ortho.right = maxDim / 2;
+		ortho.top = maxDim / 2;
+		ortho.bottom = -maxDim / 2;
 		ortho.position.set(center.x, center.y, box.max.z + 10);
 		ortho.lookAt(center.x, center.y, center.z);
 		ortho.updateProjectionMatrix();
 
-		// Hide helpers
-		const hidden: Object3D[] = [];
+		// Clear hidden array and reuse
+		hidden.length = 0;
 		const originalBackground = scene.background;
 		scene.background = null;
 		scene.traverse((object) => {
@@ -108,7 +138,6 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 		hidden.forEach((obj) => (obj.visible = true));
 
 		// Read pixels
-		const pixels = new Uint8Array(renderSize * renderSize * 4);
 		gl.readRenderTargetPixels(
 			renderTarget,
 			0,
@@ -118,8 +147,17 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 			pixels
 		);
 
-		// Copy pixels directly (shader already applied depth range + inversion)
-		const imageData = ctx.createImageData(renderSize, renderSize);
+		// Reuse imageData context instead of creating new every frame
+		// Get existing imageData from canvas context if available
+		let imageData: ImageData;
+		try {
+			imageData = ctx.getImageData(0, 0, renderSize, renderSize);
+		} catch {
+			// Fallback if getImageData fails
+			imageData = ctx.createImageData(renderSize, renderSize);
+		}
+
+		// Copy pixels
 		for (let y = 0; y < renderSize; y++) {
 			for (let x = 0; x < renderSize; x++) {
 				const flippedY = renderSize - 1 - y;
