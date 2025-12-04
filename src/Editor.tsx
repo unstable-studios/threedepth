@@ -4,6 +4,10 @@ import { CameraControls, CameraControlsImpl, Grid } from '@react-three/drei';
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { HiDownload, HiUpload } from 'react-icons/hi';
 import { Model } from './components/3d/ModelLoaders';
+import {
+	DepthPreviewRenderer,
+	DepthPreviewUI,
+} from './components/DepthPreview';
 import defaultStlUrl from './assets/3d/ThreeDepth.stl?url';
 import useDarkMode from './hooks/useDarkMode';
 import {
@@ -18,6 +22,7 @@ import { exportDepthPNG } from './utils/exportDepth';
 import {
 	MdOutlineCenterFocusStrong,
 	MdOutlineInvertColors,
+	MdRemoveRedEye,
 } from 'react-icons/md';
 import clsx from 'clsx';
 
@@ -116,6 +121,7 @@ export default function Editor() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const exportRef = useRef<(() => void) | null>(null);
+	const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 	const { isDark } = useDarkMode();
 
 	const upAxisOptions = [
@@ -239,6 +245,7 @@ export default function Editor() {
 				onChange={handleFileChange}
 				className='hidden'
 			/>
+			<DepthPreviewUI canvasRef={previewCanvasRef} />
 			<div className='absolute inset-0'>
 				<Canvas camera={{ position: [0, 0, 30], near: 1, far: 100 }}>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
@@ -289,6 +296,11 @@ export default function Editor() {
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
 						setExportFn={(fn) => (exportRef.current = fn)}
+					/>
+
+					<DepthPreviewRenderer
+						invertDepth={invertDepth}
+						canvasRef={previewCanvasRef}
 					/>
 				</Canvas>
 			</div>
