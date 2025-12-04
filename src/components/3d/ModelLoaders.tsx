@@ -64,12 +64,16 @@ export function STLModel({
 	upAxis = 'Z+',
 	showDepth = false,
 	invertDepth = false,
+	depthMin = 0,
+	depthMax = 1,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
 	invertDepth?: boolean;
+	depthMin?: number;
+	depthMax?: number;
 	onReady?: () => void;
 }) {
 	const geometry = useLoader(STLLoader, url);
@@ -89,10 +93,11 @@ export function STLModel({
 			const box = new THREE.Box3().setFromObject(normalized);
 			material.setDepthRange(box.min.z, box.max.z);
 			material.setInvert(invertDepth);
+			material.setDepthClipRange(depthMin, depthMax);
 		}
 
 		return normalized;
-	}, [geometry, upAxis, showDepth, invertDepth]);
+	}, [geometry, upAxis, showDepth, invertDepth, depthMin, depthMax]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -110,12 +115,16 @@ export function GLTFModel({
 	upAxis = 'Z+',
 	showDepth = false,
 	invertDepth = false,
+	depthMin = 0,
+	depthMax = 1,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
 	invertDepth?: boolean;
+	depthMin?: number;
+	depthMax?: number;
 	onReady?: () => void;
 }) {
 	const gltf = useLoader(GLTFLoader, url);
@@ -128,12 +137,13 @@ export function GLTFModel({
 					const depthMat = new OrthographicDepthMaterial();
 					depthMat.setDepthRange(box.min.z, box.max.z);
 					depthMat.setInvert(invertDepth);
+					depthMat.setDepthClipRange(depthMin, depthMax);
 					child.material = depthMat;
 				}
 			});
 		}
 		return obj;
-	}, [gltf.scene, upAxis, showDepth, invertDepth]);
+	}, [gltf.scene, upAxis, showDepth, invertDepth, depthMin, depthMax]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -151,12 +161,16 @@ export function OBJModel({
 	upAxis = 'Z+',
 	showDepth = false,
 	invertDepth = false,
+	depthMin = 0,
+	depthMax = 1,
 	onReady,
 }: {
 	url: string;
 	upAxis?: string;
 	showDepth?: boolean;
 	invertDepth?: boolean;
+	depthMin?: number;
+	depthMax?: number;
 	onReady?: () => void;
 }) {
 	const model = useLoader(OBJLoader, url);
@@ -169,12 +183,13 @@ export function OBJModel({
 					const depthMat = new OrthographicDepthMaterial();
 					depthMat.setDepthRange(box.min.z, box.max.z);
 					depthMat.setInvert(invertDepth);
+					depthMat.setDepthClipRange(depthMin, depthMax);
 					child.material = depthMat;
 				}
 			});
 		}
 		return obj;
-	}, [model, upAxis, showDepth, invertDepth]);
+	}, [model, upAxis, showDepth, invertDepth, depthMin, depthMax]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -193,6 +208,8 @@ export function Model({
 	upAxis = 'Z+',
 	showDepth = false,
 	invertDepth = false,
+	depthMin = 0,
+	depthMax = 1,
 	onReady,
 }: {
 	url: string;
@@ -200,6 +217,8 @@ export function Model({
 	upAxis?: string;
 	showDepth?: boolean;
 	invertDepth?: boolean;
+	depthMin?: number;
+	depthMax?: number;
 	onReady?: () => void;
 }) {
 	if (format === 'stl')
@@ -209,6 +228,8 @@ export function Model({
 				upAxis={upAxis}
 				showDepth={showDepth}
 				invertDepth={invertDepth}
+				depthMin={depthMin}
+				depthMax={depthMax}
 				onReady={onReady}
 			/>
 		);
@@ -219,6 +240,8 @@ export function Model({
 				upAxis={upAxis}
 				showDepth={showDepth}
 				invertDepth={invertDepth}
+				depthMin={depthMin}
+				depthMax={depthMax}
 				onReady={onReady}
 			/>
 		);
@@ -229,6 +252,8 @@ export function Model({
 				upAxis={upAxis}
 				showDepth={showDepth}
 				invertDepth={invertDepth}
+				depthMin={depthMin}
+				depthMax={depthMax}
 				onReady={onReady}
 			/>
 		);

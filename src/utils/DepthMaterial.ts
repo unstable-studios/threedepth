@@ -19,24 +19,40 @@ export class OrthographicDepthMaterial extends THREE.ShaderMaterial {
 				uniform float minZ;
 				uniform float maxZ;
 				uniform bool invert;
+				uniform float depthClipMin;
+				uniform float depthClipMax;
 				
 				void main() {
 					// Normalize depth from minZ to maxZ to 0-1 range
 					float normalizedDepth = (vDepth - minZ) / (maxZ - minZ);
 					// Clamp to 0-1
 					normalizedDepth = clamp(normalizedDepth, 0.0, 1.0);
+					
+					// Apply depth range clipping
+					float clippedDepth;
+					if (normalizedDepth < depthClipMin) {
+						clippedDepth = 0.0; // Below min = black
+					} else if (normalizedDepth > depthClipMax) {
+						clippedDepth = 1.0; // Above max = white
+					} else {
+						// Remap to 0-1 range
+						clippedDepth = (normalizedDepth - depthClipMin) / (depthClipMax - depthClipMin);
+					}
+					
 					// Invert if needed
 					if (invert) {
-						normalizedDepth = 1.0 - normalizedDepth;
+						clippedDepth = 1.0 - clippedDepth;
 					}
 					// Output as grayscale (0 = black/bottom, 1 = white/top)
-					gl_FragColor = vec4(vec3(normalizedDepth), 1.0);
+					gl_FragColor = vec4(vec3(clippedDepth), 1.0);
 				}
 			`,
 			uniforms: {
 				minZ: { value: 0.0 },
 				maxZ: { value: 20.0 },
 				invert: { value: false },
+				depthClipMin: { value: 0.0 },
+				depthClipMax: { value: 1.0 },
 			},
 		});
 	}
@@ -48,5 +64,10 @@ export class OrthographicDepthMaterial extends THREE.ShaderMaterial {
 
 	setInvert(invert: boolean) {
 		this.uniforms.invert.value = invert;
+	}
+
+	setDepthClipRange(min: number, max: number) {
+		this.uniforms.depthClipMin.value = min;
+		this.uniforms.depthClipMax.value = max;
 	}
 }

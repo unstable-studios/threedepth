@@ -12,11 +12,18 @@ import {
 
 interface DepthPreviewProps {
 	invertDepth: boolean;
+	depthMin: number; // 0-1 normalized depth range
+	depthMax: number;
 	canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 // Component that runs inside Canvas and has access to Three.js context
-function DepthPreviewCanvas({ invertDepth, canvasRef }: DepthPreviewProps) {
+function DepthPreviewCanvas({
+	invertDepth,
+	depthMin,
+	depthMax,
+	canvasRef,
+}: DepthPreviewProps) {
 	const renderTargetRef = useRef<WebGLRenderTarget | null>(null);
 
 	useEffect(() => {
@@ -113,17 +120,35 @@ function DepthPreviewCanvas({ invertDepth, canvasRef }: DepthPreviewProps) {
 			pixels
 		);
 
-		// Update canvas
+		// Update canvas with depth range remapping
 		const imageData = ctx.createImageData(renderSize, renderSize);
 		for (let y = 0; y < renderSize; y++) {
 			for (let x = 0; x < renderSize; x++) {
 				const flippedY = renderSize - 1 - y;
 				const srcIdx = (flippedY * renderSize + x) * 4;
 				const dstIdx = (y * renderSize + x) * 4;
-				imageData.data[dstIdx] = pixels[srcIdx];
-				imageData.data[dstIdx + 1] = pixels[srcIdx + 1];
-				imageData.data[dstIdx + 2] = pixels[srcIdx + 2];
-				imageData.data[dstIdx + 3] = pixels[srcIdx + 3];
+
+				// Get original depth value (assuming grayscale, all RGB channels are same)
+				const depthValue = pixels[srcIdx] / 255; // Normalize to 0-1
+
+				// Remap depth based on custom range
+				// depthMin = 0, depthMax = 1 means full range (no change)
+				// If depth is outside range, clamp to black/white
+				let remappedDepth: number;
+				if (depthValue < depthMin) {
+					remappedDepth = 0; // Below min = black
+				} else if (depthValue > depthMax) {
+					remappedDepth = 1; // Above max = white
+				} else {
+					// Remap to 0-1 range
+					remappedDepth = (depthValue - depthMin) / (depthMax - depthMin);
+				}
+
+				const finalValue = Math.round(remappedDepth * 255);
+				imageData.data[dstIdx] = finalValue;
+				imageData.data[dstIdx + 1] = finalValue;
+				imageData.data[dstIdx + 2] = finalValue;
+				imageData.data[dstIdx + 3] = pixels[srcIdx + 3]; // Preserve alpha
 			}
 		}
 		ctx.putImageData(imageData, 0, 0);
@@ -166,8 +191,9 @@ export function DepthPreviewUI({
 		<div
 			className={clsx(
 				'bg-glass text-primary dark:text-primary-dark dark:bg-glass-dark shadow-2xl backdrop-blur-xs',
-				'pointer-events-none fixed top-4 right-4 z-50 overflow-hidden rounded-xl p-2 md:top-auto md:right-4 md:bottom-4',
-				'text-sm font-semibold'
+				'pointer-events-none fixed top-4 right-4 z-50 overflow-hidden rounded-xl p-2 md:top-auto md:right-4 md:bottom-4 md:p-4',
+				'text-sm font-semibold',
+				'flex flex-col items-start justify-center gap-2 md:gap-4'
 			)}
 		>
 			Preview
@@ -181,7 +207,16 @@ export function DepthPreviewUI({
 // Component to be used inside Canvas
 export function DepthPreviewRenderer({
 	invertDepth,
+	depthMin,
+	depthMax,
 	canvasRef,
 }: DepthPreviewProps) {
-	return <DepthPreviewCanvas invertDepth={invertDepth} canvasRef={canvasRef} />;
+	return (
+		<DepthPreviewCanvas
+			invertDepth={invertDepth}
+			depthMin={depthMin}
+			depthMax={depthMax}
+			canvasRef={canvasRef}
+		/>
+	);
 }

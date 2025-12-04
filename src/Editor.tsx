@@ -17,12 +17,14 @@ import {
 	closeToolbarDrawer,
 } from './components/ui/Toolbar';
 import { ExpandableButton } from './components/ui/ExpandableButton';
+import { RangeSlider } from './components/ui/RangeSlider';
 import * as THREE from 'three';
 import { exportDepthPNG } from './utils/exportDepth';
 import {
 	MdOutlineCenterFocusStrong,
 	MdOutlineInvertColors,
 	MdRemoveRedEye,
+	MdTune,
 } from 'react-icons/md';
 import clsx from 'clsx';
 
@@ -31,9 +33,13 @@ const { ACTION } = CameraControlsImpl;
 function CameraController({
 	setResetFn,
 	setExportFn,
+	depthMin,
+	depthMax,
 }: {
 	setResetFn: (fn: () => void) => void;
 	setExportFn: (fn: () => void) => void;
+	depthMin: number;
+	depthMax: number;
 }) {
 	const { scene, gl } = useThree();
 	const controlsRef = useRef<CameraControls | null>(null);
@@ -75,10 +81,10 @@ function CameraController({
 		setResetFn(reset);
 
 		const exportImage = () => {
-			exportDepthPNG(scene, gl);
+			exportDepthPNG(scene, gl, depthMin, depthMax);
 		};
 		setExportFn(exportImage);
-	}, [scene, setResetFn, setExportFn, gl]);
+	}, [scene, setResetFn, setExportFn, gl, depthMin, depthMax]);
 
 	return (
 		<CameraControls
@@ -116,6 +122,8 @@ export default function Editor() {
 	>(null);
 	const [upAxis, setUpAxis] = useState<string>('Z+');
 	const [invertDepth, setInvertDepth] = useState<boolean>(false);
+	const [depthMin, setDepthMin] = useState<number>(0); // 0-1 normalized depth range
+	const [depthMax, setDepthMax] = useState<number>(1);
 	// const [showDepth, setShowDepth] = useState<boolean>(true);
 	const showDepth = true;
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -193,6 +201,32 @@ export default function Editor() {
 			</ToolbarItem>
 			<ToolbarItem>
 				<ExpandableButton
+					id='depth-range'
+					icon={<MdTune className='h-8 w-8' />}
+					label='Depth Range'
+					onClick={() => openToolbarDrawer('depth-range')}
+				/>
+			</ToolbarItem>
+
+			{/* Drawer contents: Depth Range slider */}
+			<ToolbarDrawerItem>
+				<div className='w-64 px-2'>
+					<RangeSlider
+						min={0}
+						max={1}
+						valueMin={depthMin}
+						valueMax={depthMax}
+						onChange={(min, max) => {
+							setDepthMin(min);
+							setDepthMax(max);
+						}}
+						step={0.01}
+						label='Depth Clipping'
+					/>
+				</div>
+			</ToolbarDrawerItem>
+			<ToolbarItem>
+				<ExpandableButton
 					icon={<MdOutlineCenterFocusStrong className='h-8 w-8' />}
 					label='Recenter'
 					onClick={handleResetCamera}
@@ -249,7 +283,6 @@ export default function Editor() {
 			<div className='absolute inset-0'>
 				<Canvas camera={{ position: [0, 0, 30], near: 1, far: 100 }}>
 					<color attach='background' args={[isDark ? '#1a1a1a' : '#f8fafc']} />
-
 					{/* Subtle infinite grid: follows camera and hints at scale */}
 					<Grid
 						infiniteGrid
@@ -265,7 +298,6 @@ export default function Editor() {
 						rotation={[Math.PI / 2, 0, 0]}
 						userData={{ isHelper: true }}
 					/>
-
 					<Suspense fallback={null}>
 						{modelUrl && modelFormat ? (
 							<Model
@@ -274,6 +306,8 @@ export default function Editor() {
 								upAxis={upAxis}
 								showDepth={showDepth}
 								invertDepth={invertDepth}
+								depthMin={depthMin}
+								depthMax={depthMax}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						) : (
@@ -283,23 +317,26 @@ export default function Editor() {
 								upAxis={upAxis}
 								showDepth={showDepth}
 								invertDepth={invertDepth}
+								depthMin={depthMin}
+								depthMax={depthMax}
 								onReady={() => resetCameraRef.current?.()}
 							/>
 						)}
 					</Suspense>
-
 					<ambientLight intensity={0.5} />
 					<directionalLight position={[5, 5, 5]} intensity={1.2} />
 					<directionalLight position={[-3, -3, 3]} intensity={0.6} />
 					<pointLight position={[20, 50, 30]} intensity={0.6} />
-
 					<CameraController
 						setResetFn={(fn) => (resetCameraRef.current = fn)}
 						setExportFn={(fn) => (exportRef.current = fn)}
-					/>
-
+						depthMin={depthMin}
+						depthMax={depthMax}
+					/>{' '}
 					<DepthPreviewRenderer
 						invertDepth={invertDepth}
+						depthMin={depthMin}
+						depthMax={depthMax}
 						canvasRef={previewCanvasRef}
 					/>
 				</Canvas>
