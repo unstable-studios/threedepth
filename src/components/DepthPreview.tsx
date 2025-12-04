@@ -8,7 +8,9 @@ import {
 	WebGLRenderTarget,
 	Mesh,
 	Object3D,
+	Material,
 } from 'three';
+import { OrthographicDepthMaterial } from '../utils/DepthMaterial';
 
 interface DepthPreviewProps {
 	invertDepth: boolean;
@@ -82,6 +84,22 @@ function DepthPreviewCanvas({
 		ortho.lookAt(center.x, center.y, center.z);
 		ortho.updateProjectionMatrix();
 
+		// Swap materials to depth shader
+		const originalMaterials: Array<{
+			mesh: Mesh;
+			material: Material | Material[];
+		}> = [];
+		scene.traverse((object) => {
+			if (object instanceof Mesh && !object.userData?.isHelper) {
+				originalMaterials.push({ mesh: object, material: object.material });
+				const depthMat = new OrthographicDepthMaterial();
+				depthMat.setDepthRange(box.min.z, box.max.z);
+				depthMat.setInvert(invertDepth);
+				depthMat.setDepthClipRange(depthMin, depthMax);
+				object.material = depthMat;
+			}
+		});
+
 		// Hide helpers
 		const hidden: Object3D[] = [];
 		const originalBackground = scene.background;
@@ -109,6 +127,11 @@ function DepthPreviewCanvas({
 		// Restore helpers
 		hidden.forEach((obj) => (obj.visible = true));
 
+		// Restore original materials
+		originalMaterials.forEach(({ mesh, material }) => {
+			mesh.material = material;
+		});
+
 		// Read pixels
 		const pixels = new Uint8Array(renderSize * renderSize * 4);
 		gl.readRenderTargetPixels(
@@ -120,35 +143,17 @@ function DepthPreviewCanvas({
 			pixels
 		);
 
-		// Update canvas with depth range remapping
+		// Copy pixels directly (shader already applied depth range + inversion)
 		const imageData = ctx.createImageData(renderSize, renderSize);
 		for (let y = 0; y < renderSize; y++) {
 			for (let x = 0; x < renderSize; x++) {
 				const flippedY = renderSize - 1 - y;
 				const srcIdx = (flippedY * renderSize + x) * 4;
 				const dstIdx = (y * renderSize + x) * 4;
-
-				// Get original depth value (assuming grayscale, all RGB channels are same)
-				const depthValue = pixels[srcIdx] / 255; // Normalize to 0-1
-
-				// Remap depth based on custom range
-				// depthMin = 0, depthMax = 1 means full range (no change)
-				// If depth is outside range, clamp to black/white
-				let remappedDepth: number;
-				if (depthValue < depthMin) {
-					remappedDepth = 0; // Below min = black
-				} else if (depthValue > depthMax) {
-					remappedDepth = 1; // Above max = white
-				} else {
-					// Remap to 0-1 range
-					remappedDepth = (depthValue - depthMin) / (depthMax - depthMin);
-				}
-
-				const finalValue = Math.round(remappedDepth * 255);
-				imageData.data[dstIdx] = finalValue;
-				imageData.data[dstIdx + 1] = finalValue;
-				imageData.data[dstIdx + 2] = finalValue;
-				imageData.data[dstIdx + 3] = pixels[srcIdx + 3]; // Preserve alpha
+				imageData.data[dstIdx] = pixels[srcIdx];
+				imageData.data[dstIdx + 1] = pixels[srcIdx + 1];
+				imageData.data[dstIdx + 2] = pixels[srcIdx + 2];
+				imageData.data[dstIdx + 3] = pixels[srcIdx + 3];
 			}
 		}
 		ctx.putImageData(imageData, 0, 0);
