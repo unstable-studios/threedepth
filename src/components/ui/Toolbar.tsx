@@ -139,15 +139,45 @@ export function ToolbarItem({ children }: { children: ReactNode }) {
 	return createPortal(children, el);
 }
 
-// Drawer item - portal contents into the drawer slot
-export function ToolbarDrawerItem({ children }: { children: ReactNode }) {
+// Drawer item - portal contents into the drawer slot only if ownerId matches
+export function ToolbarDrawerItem({
+	children,
+	ownerId,
+}: {
+	children: ReactNode;
+	ownerId: string;
+}) {
 	const [el, setEl] = useState<HTMLElement | null>(null);
+	const [currentOwnerId, setCurrentOwnerId] = useState<string | null>(null);
 
 	useEffect(() => {
 		setEl(document.getElementById('app-toolbar-drawer-slot'));
 	}, []);
 
-	if (!el) return null;
+	useEffect(() => {
+		const onOpen = (e: Event) => {
+			const customEvent = e as CustomEvent<{ ownerId?: string }>;
+			setCurrentOwnerId(customEvent.detail?.ownerId || null);
+		};
+		const onClose = () => {
+			setCurrentOwnerId(null);
+		};
+		window.addEventListener('toolbar-drawer:open', onOpen as EventListener);
+		window.addEventListener('toolbar-drawer:close', onClose as EventListener);
+		return () => {
+			window.removeEventListener(
+				'toolbar-drawer:open',
+				onOpen as EventListener
+			);
+			window.removeEventListener(
+				'toolbar-drawer:close',
+				onClose as EventListener
+			);
+		};
+	}, []);
+
+	// Only render if this drawer item's ownerId matches the current drawer owner
+	if (!el || currentOwnerId !== ownerId) return null;
 	return createPortal(children, el);
 }
 

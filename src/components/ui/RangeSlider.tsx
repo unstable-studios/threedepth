@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
+import { PiTagSimpleFill } from 'react-icons/pi';
 
 interface RangeSliderProps {
 	min: number;
@@ -10,6 +11,7 @@ interface RangeSliderProps {
 	step?: number;
 	className?: string;
 	label?: string;
+	inverted?: boolean;
 }
 
 export function RangeSlider({
@@ -21,6 +23,7 @@ export function RangeSlider({
 	step = 0.01,
 	className,
 	label,
+	inverted = false,
 }: RangeSliderProps) {
 	const trackRef = useRef<HTMLDivElement>(null);
 	const [dragging, setDragging] = useState<'min' | 'max' | null>(null);
@@ -84,14 +87,14 @@ export function RangeSlider({
 	return (
 		<div className={clsx('flex flex-col gap-2', className)}>
 			{label && (
-				<div className='flex items-center justify-between text-sm'>
-					<span className='font-medium'>{label}</span>
+				<div className='text-md flex items-center justify-between font-semibold'>
+					<span className='text-lg'>{label}</span>
 					<span className='text-muted dark:text-muted-dark'>
 						{valueMin.toFixed(2)} – {valueMax.toFixed(2)}
 					</span>
 				</div>
 			)}
-			<div className='relative h-10 select-none'>
+			<div className='relative mx-4 h-10 select-none'>
 				{/* Track background */}
 				<div
 					ref={trackRef}
@@ -108,20 +111,26 @@ export function RangeSlider({
 				/>
 
 				{/* Min thumb */}
-				<div
+				<PiTagSimpleFill
 					className={clsx(
-						'border-accent dark:border-accent-dark bg-surface dark:bg-surface-dark absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 shadow-md transition-transform active:cursor-grabbing',
-						dragging === 'min' && 'scale-125'
+						'absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-grab transition-transform active:cursor-grabbing',
+						inverted
+							? 'text-gray-300 dark:text-gray-300' // inverted: min is light
+							: 'text-gray-600 dark:text-gray-700', // normal: min is dark
+						dragging === 'min' && 'scale-120'
 					)}
 					style={{ left: `${minPercent}%` }}
 					onMouseDown={handleMouseDown('min')}
 				/>
 
 				{/* Max thumb */}
-				<div
+				<PiTagSimpleFill
 					className={clsx(
-						'border-accent dark:border-accent-dark bg-surface dark:bg-surface-dark absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 shadow-md transition-transform active:cursor-grabbing',
-						dragging === 'max' && 'scale-125'
+						'absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rotate-180 cursor-grab transition-transform active:cursor-grabbing',
+						inverted
+							? 'text-gray-600 dark:text-gray-700' // inverted: max is dark
+							: 'text-gray-300 dark:text-gray-300', // normal: max is light
+						dragging === 'max' && 'scale-120'
 					)}
 					style={{ left: `${maxPercent}%` }}
 					onMouseDown={handleMouseDown('max')}

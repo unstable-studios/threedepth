@@ -209,8 +209,8 @@ export default function Editor() {
 			</ToolbarItem>
 
 			{/* Drawer contents: Depth Range slider */}
-			<ToolbarDrawerItem>
-				<div className='w-64 px-2'>
+			<ToolbarDrawerItem ownerId='depth-range'>
+				<div className='w-64 p-2'>
 					<RangeSlider
 						min={0}
 						max={1}
@@ -221,7 +221,8 @@ export default function Editor() {
 							setDepthMax(max);
 						}}
 						step={0.01}
-						label='Depth Clipping'
+						label='Depth Range'
+						inverted={invertDepth}
 					/>
 				</div>
 			</ToolbarDrawerItem>
@@ -234,21 +235,24 @@ export default function Editor() {
 			</ToolbarItem>
 
 			{/* Drawer contents: Up Axis options */}
-			<ToolbarDrawerItem>
-				<div className='flex items-center gap-2'>
-					{upAxisOptions.map((option) => (
-						<button
-							key={option.value}
-							className={clsx(
-								'glass text-md rounded-lg px-3 py-2 font-semibold',
-								option.value === upAxis &&
-									'bg-accent dark:bg-accent-dark text-onaccent dark:text-onaccent-dark'
-							)}
-							onClick={() => handleUpAxisChange(option.value)}
-						>
-							{option.label}
-						</button>
-					))}
+			<ToolbarDrawerItem ownerId='depth-axis'>
+				<div className='flex flex-col gap-2 p-2'>
+					<span className='block text-lg font-semibold'>Depth Axis</span>
+					<div className='flex items-center gap-2'>
+						{upAxisOptions.map((option) => (
+							<button
+								key={option.value}
+								className={clsx(
+									'glass text-md rounded-lg px-3 py-2 font-semibold',
+									option.value === upAxis &&
+										'bg-accent dark:bg-accent-dark text-onaccent dark:text-onaccent-dark'
+								)}
+								onClick={() => handleUpAxisChange(option.value)}
+							>
+								{option.label}
+							</button>
+						))}
+					</div>
 				</div>
 			</ToolbarDrawerItem>
 			<ToolbarItem>
