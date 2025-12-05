@@ -29,6 +29,15 @@ export default function About() {
 				</div>
 				<div className='text-secondary dark:text-secondary-dark border-secondary/20 dark:border-secondary-dark/20 border-t pt-4'>
 					<p>Built with React, Three.js, and R3F</p>
+					<p>© 2025 Unstable Studios, LLC</p>
+					<a
+						href='https://github.com/unstable-studios/threedepth'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-accent dark:text-accent-dark underline underline-offset-2'
+					>
+						github.com/unstable-studios/threedepth
+					</a>
 				</div>
 			</div>
 		</Modal>
