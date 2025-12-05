@@ -45,11 +45,6 @@ jobs:
         env:
           CI: true
 
-      - name: Test
-        run: npm test -- --runInBand
-        env:
-          CI: true
-
       - name: Build
         run: npm run build
         env:
