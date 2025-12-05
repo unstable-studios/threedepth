@@ -17,6 +17,7 @@ import {
 	Object3D,
 } from 'three';
 import { OrthographicDepthMaterial } from '../../utils/DepthMaterial';
+import { logger } from '../../utils/diagnostics';
 
 // Normalize object to fit in 20x20x20 cube with base at z=0
 // Then apply rotation to match the desired up axis
@@ -100,6 +101,7 @@ export function STLModel({
 }) {
 	const geometry = useLoader(STLLoader, url);
 	const mesh = useMemo(() => {
+		logger.info('STL model loading', { url: url.substring(0, 50) });
 		const material = showDepth
 			? new OrthographicDepthMaterial()
 			: new MeshStandardMaterial({
@@ -120,8 +122,18 @@ export function STLModel({
 			material.setDepthClipRange(depthMin, depthMax);
 		}
 
+		logger.info('STL model loaded successfully');
 		return normalized;
-	}, [geometry, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
+	}, [
+		geometry,
+		upAxis,
+		showDepth,
+		invertDepth,
+		depthMin,
+		depthMax,
+		zScale,
+		url,
+	]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -155,6 +167,7 @@ export function GLTFModel({
 }) {
 	const gltf = useLoader(GLTFLoader, url);
 	const normalized = useMemo(() => {
+		logger.info('GLTF model loading', { url: url.substring(0, 50) });
 		const obj = normalizeObject(gltf.scene, upAxis, zScale);
 		if (showDepth) {
 			const box = new Box3().setFromObject(obj);
@@ -170,8 +183,18 @@ export function GLTFModel({
 				}
 			});
 		}
+		logger.info('GLTF model loaded successfully');
 		return obj;
-	}, [gltf.scene, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
+	}, [
+		gltf.scene,
+		upAxis,
+		showDepth,
+		invertDepth,
+		depthMin,
+		depthMax,
+		zScale,
+		url,
+	]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {
@@ -205,6 +228,7 @@ export function OBJModel({
 }) {
 	const model = useLoader(OBJLoader, url);
 	const normalized = useMemo(() => {
+		logger.info('OBJ model loading', { url: url.substring(0, 50) });
 		const obj = normalizeObject(model, upAxis, zScale);
 		if (showDepth) {
 			const box = new Box3().setFromObject(obj);
@@ -220,8 +244,9 @@ export function OBJModel({
 				}
 			});
 		}
+		logger.info('OBJ model loaded successfully');
 		return obj;
-	}, [model, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale]);
+	}, [model, upAxis, showDepth, invertDepth, depthMin, depthMax, zScale, url]);
 
 	const firedRef = useRef<string | null>(null);
 	useEffect(() => {

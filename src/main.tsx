@@ -12,21 +12,27 @@ import About from './pages/About';
 import Help from './pages/Help';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { logger } from './utils/diagnostics';
+
+logger.info('Application starting');
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<BrowserRouter>
-			<Routes>
-				<Route element={<Layout />}>
-					{/* Editor is the base content; child routes render as modals over it */}
-					<Route path='/' element={<Editor />}>
-						<Route path='about' element={<About />} />
-						<Route path='help' element={<Help />} />
-						<Route path='privacy' element={<Privacy />} />
-						<Route path='terms' element={<Terms />} />
+		<ErrorBoundary>
+			<BrowserRouter>
+				<Routes>
+					<Route element={<Layout />}>
+						{/* Editor is the base content; child routes render as modals over it */}
+						<Route path='/' element={<Editor />}>
+							<Route path='about' element={<About />} />
+							<Route path='help' element={<Help />} />
+							<Route path='privacy' element={<Privacy />} />
+							<Route path='terms' element={<Terms />} />
+						</Route>
 					</Route>
-				</Route>
-			</Routes>
-		</BrowserRouter>
+				</Routes>
+			</BrowserRouter>
+		</ErrorBoundary>
 	</StrictMode>
 );

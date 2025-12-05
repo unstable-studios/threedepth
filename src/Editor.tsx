@@ -54,6 +54,7 @@ import {
 	MdTune,
 } from 'react-icons/md';
 import clsx from 'clsx';
+import { logger } from './utils/diagnostics';
 
 // Lazy load the export modal to reduce initial bundle size
 const ExportDetails = lazy(() =>
@@ -182,6 +183,22 @@ export default function Editor() {
 	const previewCanvasRef = useRef<HTMLCanvasElement>(null!);
 	const { isDark } = useDarkMode();
 
+	// Log component lifecycle
+	useEffect(() => {
+		logger.info('Editor component mounted');
+		return () => {
+			logger.info('Editor component unmounted');
+		};
+	}, []);
+
+	// Log model changes
+	useEffect(() => {
+		logger.info('Model changed', {
+			modelFormat,
+			modelUrl: modelUrl.substring(0, 50),
+		});
+	}, [modelUrl, modelFormat]);
+
 	const upAxisOptions = [
 		{ value: 'Z+', label: 'Z+' },
 		{ value: 'Z-', label: 'Z-' },
@@ -245,11 +262,21 @@ export default function Editor() {
 
 			const extension = file.name.split('.').pop()?.toLowerCase();
 			if (!extension || !['gltf', 'glb', 'stl', 'obj'].includes(extension)) {
+				logger.warn('Unsupported file format attempted', {
+					extension,
+					filename: file.name,
+				});
 				alert(
 					'Unsupported file format. Please use GLTF, GLB, STL, or OBJ files.'
 				);
 				return;
 			}
+
+			logger.info('Loading model file', {
+				format: extension,
+				filename: file.name,
+				size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+			});
 
 			const url = URL.createObjectURL(file);
 			setModelUrl(url);
