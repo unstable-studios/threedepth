@@ -1,0 +1,155 @@
+name: Prepare Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type (major|minor|patch)"
+        required: false
+        default: "patch"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine version bump
+        id: bump
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || '' }}
+          INPUT_BUMP: ${{ github.event.inputs.bump || '' }}
+        run: |
+          PREV_VERSION=$(node -p "require('./package.json').version")
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$PREV_VERSION"
+
+          # CLI override takes precedence
+          if [[ "$INPUT_BUMP" =~ ^(major|minor|patch)$ ]]; then
+            TYPE="$INPUT_BUMP"
+          else
+            # Infer from commit message
+            if [[ "$COMMIT_MESSAGE" =~ ^(release|major) ]]; then
+              TYPE="major"
+            elif [[ "$COMMIT_MESSAGE" =~ ^(feature|minor) ]]; then
+              TYPE="minor"
+            else
+              TYPE="patch"
+            fi
+          fi
+
+          case "$TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor)
+              MINOR=$((MINOR + 1)); PATCH=0 ;;
+            *)
+              PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "type=$TYPE" >> $GITHUB_OUTPUT
+          echo "prev=$PREV_VERSION" >> $GITHUB_OUTPUT
+          echo "next=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bump: $PREV_VERSION -> $NEW_VERSION ($TYPE)"
+
+      - name: Bump version
+        run: npm version ${{ steps.bump.outputs.next }} --no-git-tag-version
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"%H %s")
+          else
+            COMMITS=$(git log "$PREV_TAG"..HEAD --pretty=format:"%H %s")
+          fi
+
+          CHANGELOG="## Changes"
+          echo "$CHANGELOG" > /tmp/changelog.md
+          echo "$COMMITS" | while read HASH MSG; do
+            [ -z "$HASH" ] && continue
+            SHORT=${HASH:0:7}
+            if [[ "$MSG" =~ ^feature|^feat ]]; then
+              echo "- ✨ $MSG (\`$SHORT\`)" >> /tmp/changelog.md
+            elif [[ "$MSG" =~ ^fix|^bugfix ]]; then
+              echo "- 🐛 $MSG (\`$SHORT\`)" >> /tmp/changelog.md
+            elif [[ "$MSG" =~ ^docs ]]; then
+              echo "- 📚 $MSG (\`$SHORT\`)" >> /tmp/changelog.md
+            elif [[ "$MSG" =~ ^perf ]]; then
+              echo "- ⚡ $MSG (\`$SHORT\`)" >> /tmp/changelog.md
+            else
+              echo "- $MSG (\`$SHORT\`)" >> /tmp/changelog.md
+            fi
+          done
+
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/changelog.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            printf "\n%s\n" "${{ steps.changelog.outputs.content }}" >> CHANGELOG.md
+          else
+            printf "%s\n" "${{ steps.changelog.outputs.content }}" > CHANGELOG.md
+          fi
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore: release prep v${{ steps.bump.outputs.next }}" || echo "No changes to commit"
+
+      - name: Push release branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="release/v${{ steps.bump.outputs.next }}"
+          git push origin "HEAD:$BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Open PR into release branch
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = "release/v${{ steps.bump.outputs.next }}";
+            const title = `Release v${{ steps.bump.outputs.next }}`;
+            const body = `## Summary\n- Version: v${{ steps.bump.outputs.next }}\n- Changelog generated in CHANGELOG.md`;
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              base: 'release',
+              state: 'open',
+            });
+            if (prs.length === 0) {
+              await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: branch,
+                base: 'release',
+                title,
+                body,
+              });
+            }
