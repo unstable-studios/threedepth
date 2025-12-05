@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { Outlet } from 'react-router';
 // No JS breakpoints: rely on Tailwind responsive classes
 import useDarkMode from './hooks/useDarkMode';

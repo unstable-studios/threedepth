@@ -1,4 +1,9 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import clsx from 'clsx';
 
 interface SliderProps {

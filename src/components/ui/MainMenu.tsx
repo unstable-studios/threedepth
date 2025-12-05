@@ -1,4 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 import ThreeDepthLogo from '../../assets/2d/ThreeDepthLogo.svg?react';

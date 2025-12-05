@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { useRef, useState, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
 import { PiTagSimpleFill } from 'react-icons/pi';

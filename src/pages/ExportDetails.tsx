@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { Modal } from '../components/ui/Modal';
 import { HiCheck } from 'react-icons/hi';

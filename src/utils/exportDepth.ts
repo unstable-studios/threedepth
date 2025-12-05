@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { Box3, Vector3, OrthographicCamera, WebGLRenderTarget, Mesh, Object3D } from 'three';
 import type { Scene, WebGLRenderer } from 'three';
 

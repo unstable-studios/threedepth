@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';

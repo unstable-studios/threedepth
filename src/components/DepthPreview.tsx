@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2025 Unstable Studios, LLC
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 import { useEffect, useRef, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import clsx from 'clsx';
