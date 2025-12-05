@@ -17,6 +17,7 @@ import { logger } from './utils/diagnostics';
 
 logger.info('Application starting');
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<ErrorBoundary>

@@ -11,6 +11,12 @@ interface LogEntry {
 	data?: unknown;
 }
 
+interface PerformanceMemory {
+	jsHeapSizeLimit: number;
+	totalJSHeapSize: number;
+	usedJSHeapSize: number;
+}
+
 class DiagnosticsLogger {
 	private logs: LogEntry[] = [];
 	private maxLogs = 100;
@@ -128,15 +134,16 @@ if (typeof document !== 'undefined') {
 	});
 
 	// Log initial page load
+	const perfMemory = (performance as Performance & { memory?: PerformanceMemory }).memory;
 	logger.info('ThreeDepth initialized', {
 		userAgent: navigator.userAgent,
 		viewport: `${window.innerWidth}x${window.innerHeight}`,
 		pixelRatio: window.devicePixelRatio,
-		memory: (performance as any).memory
+		memory: perfMemory
 			? {
-					jsHeapSizeLimit: (performance as any).memory.jsHeapSizeLimit,
-					totalJSHeapSize: (performance as any).memory.totalJSHeapSize,
-					usedJSHeapSize: (performance as any).memory.usedJSHeapSize,
+					jsHeapSizeLimit: perfMemory.jsHeapSizeLimit,
+					totalJSHeapSize: perfMemory.totalJSHeapSize,
+					usedJSHeapSize: perfMemory.usedJSHeapSize,
 			  }
 			: 'not available',
 	});
@@ -145,14 +152,14 @@ if (typeof document !== 'undefined') {
 // Periodic health check
 if (typeof window !== 'undefined') {
 	setInterval(() => {
-		const memory = (performance as any).memory;
+		const perfMemory = (performance as Performance & { memory?: PerformanceMemory }).memory;
 		logger.info('Health check', {
 			visibility: document.hidden ? 'hidden' : 'visible',
-			memory: memory
+			memory: perfMemory
 				? {
-						used: Math.round(memory.usedJSHeapSize / 1024 / 1024),
-						total: Math.round(memory.totalJSHeapSize / 1024 / 1024),
-						limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024),
+						used: Math.round(perfMemory.usedJSHeapSize / 1024 / 1024),
+						total: Math.round(perfMemory.totalJSHeapSize / 1024 / 1024),
+						limit: Math.round(perfMemory.jsHeapSizeLimit / 1024 / 1024),
 				  }
 				: 'not available',
 		});

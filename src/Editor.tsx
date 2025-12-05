@@ -180,6 +180,7 @@ export default function Editor() {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const resetCameraRef = useRef<(() => void) | null>(null);
 	const exportRef = useRef<(() => void) | null>(null);
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const previewCanvasRef = useRef<HTMLCanvasElement>(null!);
 	const { isDark } = useDarkMode();
 

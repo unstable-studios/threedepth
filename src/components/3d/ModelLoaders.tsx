@@ -23,8 +23,8 @@ import { logger } from '../../utils/diagnostics';
 // Then apply rotation to match the desired up axis
 function normalizeObject(
 	object: Object3D,
-	upAxis: string = 'Z+',
-	zScale: number = 1
+	upAxis = 'Z+',
+	zScale = 1
 ): Object3D {
 	const clone = object.clone();
 	const box = new Box3().setFromObject(clone);
