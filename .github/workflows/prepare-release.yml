@@ -124,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="release/v${{ steps.bump.outputs.next }}"
+          BRANCH="releases/v${{ steps.bump.outputs.next }}"
           git push origin "HEAD:$BRANCH"
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
@@ -133,7 +133,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const branch = "release/v${{ steps.bump.outputs.next }}";
+            const branch = "releases/v${{ steps.bump.outputs.next }}";
             const title = `Release v${{ steps.bump.outputs.next }}`;
             const body = `## Summary\n- Version: v${{ steps.bump.outputs.next }}\n- Changelog generated in CHANGELOG.md`;
             const { data: prs } = await github.rest.pulls.list({
