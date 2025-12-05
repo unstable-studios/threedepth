@@ -47,7 +47,7 @@
 
 @theme {
 	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-	--font-sans--font-feature-settings: 'ss01', 'ss03';
+	--font-sans--font-feature-settings: 'ss01', 'ss03', 'liga', 'calt', 'case';
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 	--font-mono--font-feature-settings: 'zero', 'ss01', 'liga', 'dlig';
 	

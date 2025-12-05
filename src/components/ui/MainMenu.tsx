@@ -2,11 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 import ThreeDepthLogo from '../../assets/2d/ThreeDepthLogo.svg?react';
-import {
-	HiOutlineInformationCircle,
-	HiChevronRight,
-	HiCheck,
-} from 'react-icons/hi';
+import { HiChevronRight, HiCheck } from 'react-icons/hi';
 
 import useDarkMode from '../../hooks/useDarkMode';
 
@@ -183,15 +179,15 @@ export default function MainMenu() {
 				<div className='flex w-full flex-col overflow-hidden px-2 pb-2'>
 					<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
 					<MenuDivider />
-					<MenuItem
-						icon={<HiOutlineInformationCircle />}
-						label='About'
-						onClick={() => navigate('/about')}
-					/>
+					<MenuItem label='About' onClick={() => navigate('/about')} />
 					<MenuItem label='Help' onClick={() => navigate('/help')} />
 					<MenuItem
 						label='Privacy Policy'
 						onClick={() => navigate('/privacy')}
+					/>
+					<MenuItem
+						label='Terms of Service'
+						onClick={() => navigate('/terms')}
 					/>
 				</div>
 			</div>
