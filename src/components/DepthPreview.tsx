@@ -215,7 +215,7 @@ export function DepthPreviewUI({
 			)}
 		>
 			Preview
-			<div className={clsx('rounded-lg bg-black')}>
+			<div className={clsx('rounded-lg')}>
 				<div ref={setupCanvas} className='h-44 w-44 md:h-64 md:w-64' />
 			</div>
 		</div>
