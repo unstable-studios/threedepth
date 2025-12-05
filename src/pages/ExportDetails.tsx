@@ -42,7 +42,7 @@ async function addPNGMetadata(blob: Blob, dpi: number): Promise<Blob> {
 	const pHYsChunk = createChunk(chunkType, pHYsData);
 
 	// Find the position after IHDR chunk to insert pHYs
-	let pos = 8; // Skip PNG signature
+	const pos = 8; // Skip PNG signature
 	const ihdrLength = readUint32(bytes, pos);
 	const insertPos = pos + 4 + 4 + ihdrLength + 4; // length + type + data + crc
 
@@ -92,12 +92,12 @@ function calculateCRC(type: Uint8Array, data: Uint8Array): number {
 	const table = makeCRCTable();
 	let crc = 0xffffffff;
 
-	for (let i = 0; i < type.length; i++) {
-		crc = table[(crc ^ type[i]) & 0xff] ^ (crc >>> 8);
+	for (const byte of type) {
+		crc = table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
 	}
 
-	for (let i = 0; i < data.length; i++) {
-		crc = table[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
+	for (const byte of data) {
+		crc = table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
 	}
 
 	return (crc ^ 0xffffffff) >>> 0;

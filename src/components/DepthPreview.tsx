@@ -14,6 +14,7 @@ import {
 	Mesh,
 	Object3D,
 } from 'three';
+import { logger } from '../utils/diagnostics';
 
 interface DepthPreviewProps {
 	invertDepth: boolean;
@@ -34,7 +35,9 @@ function DepthPreviewCanvas({ canvasRef }: DepthPreviewProps) {
 	const hiddenRef = useRef<Object3D[]>([]);
 
 	useEffect(() => {
+		logger.info('DepthPreview component mounted');
 		return () => {
+			logger.info('DepthPreview component unmounted');
 			if (renderTargetRef.current) {
 				renderTargetRef.current.dispose();
 				renderTargetRef.current = null;

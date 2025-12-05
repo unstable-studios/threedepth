@@ -8,13 +8,13 @@ import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { HiX } from 'react-icons/hi';
 
-type ModalProps = {
+interface ModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	title?: string;
 	className?: string;
 	children: React.ReactNode;
-};
+}
 
 export function Modal({
 	isOpen,
