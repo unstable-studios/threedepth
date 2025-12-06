@@ -169,7 +169,7 @@ function CameraController({
 }
 
 export default function Editor() {
-	const isDark = useDarkMode();
+	const { isDark } = useDarkMode();
 	const [activeModal, setActiveModal] = useState<ModalType>(null);
 	const [modelUrl, setModelUrl] = useState<string>(defaultStlUrl);
 	const [modelFormat, setModelFormat] = useState<
