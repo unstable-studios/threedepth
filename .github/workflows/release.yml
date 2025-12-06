@@ -1,5 +1,5 @@
-# .github/workflows/release-and-deploy.yml
-name: Release & Deploy
+# .github/workflows/release.yml
+name: Release
 
 on:
   push:
@@ -56,38 +56,3 @@ jobs:
         env:
           # Provided automatically by GitHub Actions
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist/
-            node_modules/
-
-  deploy:
-    name: Deploy to Cloudflare Workers
-    runs-on: ubuntu-latest
-    needs: release
-
-    # Only deploy if a *new* release was actually published
-    if: needs.release.outputs.new_release_published == 'true'
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          packageManager: npm
-          wranglerVersion: "4.53.0"
