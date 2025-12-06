@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useNavigate } from 'react-router';
 import { Modal } from '../components/ui/Modal';
 
-export default function Terms() {
-	const navigate = useNavigate();
+interface TermsProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
 
+export default function Terms({ isOpen, onClose }: TermsProps) {
 	return (
-		<Modal isOpen={true} onClose={() => navigate('/')} title='Terms of Service'>
+		<Modal isOpen={isOpen} onClose={onClose} title='Terms of Service'>
 			<div className='flex flex-col gap-4'>
 				<section>
 					<h3 className='text-primary dark:text-primary-dark mb-2 font-semibold'>

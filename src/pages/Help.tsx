@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useNavigate } from 'react-router';
 import { Modal } from '../components/ui/Modal';
 
-export default function Help() {
-	const navigate = useNavigate();
+interface HelpProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
 
+export default function Help({ isOpen, onClose }: HelpProps) {
 	return (
-		<Modal isOpen={true} onClose={() => navigate('/')} title='Help'>
+		<Modal isOpen={isOpen} onClose={onClose} title='Help'>
 			<div className='flex flex-col gap-4'>
 				<section>
 					<h3 className='text-primary dark:text-primary-dark mb-2 font-semibold'>

@@ -4,12 +4,12 @@ import { useState, useRef, useEffect } from 'react';
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useNavigate } from 'react-router';
 import clsx from 'clsx';
 import ThreeDepthLogo from '../../assets/2d/ThreeDepthLogo.svg?react';
 import { HiChevronRight, HiCheck } from 'react-icons/hi';
 
 import useDarkMode from '../../hooks/useDarkMode';
+import { openModal } from '../../Editor';
 
 function AnimatedMenuIcon({
 	isOpen,
@@ -117,7 +117,6 @@ function MenuDivider() {
 export default function MainMenu() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
-	const navigate = useNavigate();
 	const { theme, setTheme } = useDarkMode();
 
 	const cycleTheme = () => {
@@ -184,15 +183,15 @@ export default function MainMenu() {
 				<div className='flex w-full flex-col overflow-hidden px-2 pb-2'>
 					<MenuItem label={getThemeLabel()} onClick={cycleTheme} />
 					<MenuDivider />
-					<MenuItem label='About' onClick={() => navigate('/about')} />
-					<MenuItem label='Help' onClick={() => navigate('/help')} />
+					<MenuItem label='About' onClick={() => openModal('about')} />
+					<MenuItem label='Help' onClick={() => openModal('help')} />
 					<MenuItem
 						label='Privacy Policy'
-						onClick={() => navigate('/privacy')}
+						onClick={() => openModal('privacy')}
 					/>
 					<MenuItem
 						label='Terms of Service'
-						onClick={() => navigate('/terms')}
+						onClick={() => openModal('terms')}
 					/>
 				</div>
 			</div>

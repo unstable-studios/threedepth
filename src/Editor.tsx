@@ -17,7 +17,6 @@
  */
 
 import { Canvas, useThree } from '@react-three/fiber';
-import { Outlet } from 'react-router';
 import { CameraControls, CameraControlsImpl, Grid } from '@react-three/drei';
 import {
 	useState,
@@ -55,6 +54,18 @@ import {
 } from 'react-icons/md';
 import clsx from 'clsx';
 import { logger } from './utils/diagnostics';
+import About from './pages/About';
+import Help from './pages/Help';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+
+export type ModalType = 'about' | 'help' | 'privacy' | 'terms' | null;
+
+let setActiveModalGlobal: ((modal: ModalType) => void) | null = null;
+
+export function openModal(modal: ModalType) {
+	if (setActiveModalGlobal) setActiveModalGlobal(modal);
+}
 
 // Lazy load the export modal to reduce initial bundle size
 const ExportDetails = lazy(() =>
@@ -158,6 +169,8 @@ function CameraController({
 }
 
 export default function Editor() {
+	const isDark = useDarkMode();
+	const [activeModal, setActiveModal] = useState<ModalType>(null);
 	const [modelUrl, setModelUrl] = useState<string>(defaultStlUrl);
 	const [modelFormat, setModelFormat] = useState<
 		'gltf' | 'glb' | 'stl' | 'obj'
@@ -182,7 +195,13 @@ export default function Editor() {
 	const exportRef = useRef<(() => void) | null>(null);
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const previewCanvasRef = useRef<HTMLCanvasElement>(null!);
-	const { isDark } = useDarkMode();
+
+	useEffect(() => {
+		setActiveModalGlobal = setActiveModal;
+		return () => {
+			setActiveModalGlobal = null;
+		};
+	}, []);
 
 	// Log component lifecycle
 	useEffect(() => {
@@ -476,7 +495,22 @@ export default function Editor() {
 					/>
 				</Canvas>
 			</div>
-			<Outlet />
+			<About
+				isOpen={activeModal === 'about'}
+				onClose={() => setActiveModal(null)}
+			/>
+			<Help
+				isOpen={activeModal === 'help'}
+				onClose={() => setActiveModal(null)}
+			/>
+			<Privacy
+				isOpen={activeModal === 'privacy'}
+				onClose={() => setActiveModal(null)}
+			/>
+			<Terms
+				isOpen={activeModal === 'terms'}
+				onClose={() => setActiveModal(null)}
+			/>
 		</main>
 	);
 }
