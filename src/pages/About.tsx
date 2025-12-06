@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useNavigate } from 'react-router';
 import { Modal } from '../components/ui/Modal';
 
-export default function About() {
-	const navigate = useNavigate();
+interface AboutProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
 
+export default function About({ isOpen, onClose }: AboutProps) {
 	return (
-		<Modal isOpen={true} onClose={() => navigate('/')} title='About ThreeDepth'>
+		<Modal isOpen={isOpen} onClose={onClose} title='About ThreeDepth'>
 			<div className='flex flex-col gap-4'>
 				<p className='text-secondary dark:text-secondary-dark text-balance'>
 					ThreeDepth is a utility for converting 3D models to depth maps. Import

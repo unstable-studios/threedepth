@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { Outlet } from 'react-router';
+import type { ReactNode } from 'react';
 // No JS breakpoints: rely on Tailwind responsive classes
 import useDarkMode from './hooks/useDarkMode';
 import MainMenu from './components/ui/MainMenu';
 import Toolbar from './components/ui/Toolbar';
 
-function Layout() {
+function Layout({ children }: { children: ReactNode }) {
 	useDarkMode(); // ensures html.dark toggles so Tailwind dark: works
 
 	return (
@@ -43,7 +43,7 @@ function Layout() {
 			</div>
 
 			<div id='main-content' className='flex flex-1 flex-col'>
-				<Outlet />
+				{children}
 			</div>
 		</div>
 	);

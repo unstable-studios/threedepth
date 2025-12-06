@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 /**
  * Copyright (C) 2025 Unstable Studios, LLC
@@ -24,6 +24,11 @@ export function Modal({
 	className,
 }: ModalProps) {
 	const modalRef = useRef<HTMLDivElement>(null);
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -47,7 +52,7 @@ export function Modal({
 		};
 	}, [isOpen, onClose]);
 
-	if (!isOpen) return null;
+	if (!mounted || !isOpen) return null;
 
 	return createPortal(
 		<div

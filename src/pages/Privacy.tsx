@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useNavigate } from 'react-router';
 import { Modal } from '../components/ui/Modal';
 
-export default function Privacy() {
-	const navigate = useNavigate();
+interface PrivacyProps {
+	isOpen: boolean;
+	onClose: () => void;
+}
 
+export default function Privacy({ isOpen, onClose }: PrivacyProps) {
 	return (
-		<Modal isOpen={true} onClose={() => navigate('/')} title='Privacy Policy'>
+		<Modal isOpen={isOpen} onClose={onClose} title='Privacy Policy'>
 			<div className='flex flex-col gap-4'>
 				<section>
 					<h3 className='text-primary dark:text-primary-dark mb-2 font-semibold'>
